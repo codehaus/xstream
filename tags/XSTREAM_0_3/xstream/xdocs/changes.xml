@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<document>
+  <properties>
+    <title>Changes</title>
+    <author email="jason@maven.org">Jason van Zyl</author>
+  </properties>
+
+  <!-- action types are add/update/fix/remove -->
+  <body>
+    <release version="1.0" date="In CVS">
+
+      <action dev="jvanzyl" type="add">
+        Added ElementMapper interface and default implementations to allow fine
+        grained control over element name to class mapper operations.
+      </action>
+
+      <action dev="jvanzyl" type="add">
+        Added XMLReader.peek() method to allow access to the underlying hierarchical
+        object being unmarshalled.
+      </action>
+
+      <action dev="jvanzyl" type="add">
+        Added XStream.fromXML(XMLReader xmlReader,Object root) method to
+        allow the population of an object graph starting with a live object root.
+      </action>
+
+      <action dev="jvanzyl" type="fix">
+        Aligned the the methods in XStream to use the specified ObjectFactory in the constructor 
+        instead of creating a SunReflectionObjectFactory.
+      </action>
+
+    </release>
+
+  </body>
+</document>
+
