@@ -1,0 +1,16 @@
+classes
+target
+lib
+*.iml
+*.ipr
+*.iws
+build
+build.properties
+*.log
+distributions.tar.gz
+old
+classes-1.3
+xstream.fb
+work
+.project
+.classpath
