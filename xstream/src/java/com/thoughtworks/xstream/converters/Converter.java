@@ -1,14 +1,14 @@
 package com.thoughtworks.xstream.converters;
 
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.xml.XMLWriter;
 
 public interface Converter {
 
     boolean canConvert(Class type);
 
-    void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context);
+    void toXML(ObjectTree objectGraph, XMLWriter xmlWriter, ConverterLookup converterLookup);
 
-    Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context);
-
+    void fromXML(ObjectTree objectGraph, XMLReader xmlReader, ConverterLookup converterLookup, Class requiredType);
 }

@@ -1,13 +1,14 @@
 package com.thoughtworks.xstream.converters.collections;
 
+import com.thoughtworks.xstream.converters.ConverterLookup;
 import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.xml.XMLWriter;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.alias.ClassMapper;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.Properties;
 
 public class PropertiesConverter implements Converter {
@@ -16,26 +17,26 @@ public class PropertiesConverter implements Converter {
         return Properties.class.isAssignableFrom(type);
     }
 
-    public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-        Properties properties = (Properties) source;
-        for (Iterator iterator = properties.entrySet().iterator(); iterator.hasNext();) {
+    public void toXML(ObjectTree objectGraph, XMLWriter xmlWriter, ConverterLookup converterLookup) {
+        Map map = (Map) objectGraph.get();
+        for (Iterator iterator = map.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry entry = (Map.Entry) iterator.next();
-            writer.startNode("property");
-            writer.addAttribute("getNodeName", entry.getKey().toString());
-            writer.addAttribute("value", entry.getValue().toString());
-            writer.endNode();
+            xmlWriter.startElement("property");
+            xmlWriter.addAttribute("name", entry.getKey().toString());
+            xmlWriter.addAttribute("value", entry.getValue().toString());
+            xmlWriter.endElement();
         }
     }
 
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public void fromXML(ObjectTree objectTree, XMLReader xmlReader, ConverterLookup converterLookup, Class requiredType) {
         Properties properties = new Properties();
-        while (reader.hasMoreChildren()) {
-            reader.moveDown();
-            String name = reader.getAttribute("getNodeName");
-            String value = reader.getAttribute("value");;
+        while (xmlReader.nextChild()) {
+            xmlReader.nextChild();
+            String name = xmlReader.attribute("name");
+            String value = xmlReader.attribute("value");
             properties.setProperty(name, value);
-            reader.moveUp();
+            xmlReader.pop();
         }
-        return properties;
+        objectTree.set(properties);
     }
 }

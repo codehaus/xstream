@@ -2,10 +2,11 @@ package com.thoughtworks.acceptance;
 
 import com.thoughtworks.acceptance.objects.Hardware;
 import com.thoughtworks.acceptance.objects.Software;
+import com.thoughtworks.xstream.XStream;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
+import java.util.Hashtable;
 import java.util.TreeMap;
 
 public class MapTest extends AbstractAcceptanceTest {
@@ -41,8 +42,8 @@ public class MapTest extends AbstractAcceptanceTest {
                 "<map>\n" +
                 "  <entry>\n" +
                 "    <software>\n" +
-                "      <name>windows</name>\n" +
                 "      <vendor>microsoft</vendor>\n" +
+                "      <name>windows</name>\n" +
                 "    </software>\n" +
                 "    <hardware>\n" +
                 "      <arch>x86</arch>\n" +

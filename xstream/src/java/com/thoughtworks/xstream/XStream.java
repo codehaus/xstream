@@ -1,22 +1,38 @@
 package com.thoughtworks.xstream;
 
 import com.thoughtworks.xstream.alias.ClassMapper;
+import com.thoughtworks.xstream.alias.DefaultClassMapper;
+import com.thoughtworks.xstream.alias.DefaultNameMapper;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.ConverterLookup;
-import com.thoughtworks.xstream.converters.basic.*;
-import com.thoughtworks.xstream.converters.collections.*;
-import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
-import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
-import com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider;
-import com.thoughtworks.xstream.core.*;
-import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.xml.DomDriver;
-import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
+import com.thoughtworks.xstream.converters.basic.BooleanConverter;
+import com.thoughtworks.xstream.converters.basic.ByteConverter;
+import com.thoughtworks.xstream.converters.basic.CharConverter;
+import com.thoughtworks.xstream.converters.basic.DateConverter;
+import com.thoughtworks.xstream.converters.basic.DoubleConverter;
+import com.thoughtworks.xstream.converters.basic.FloatConverter;
+import com.thoughtworks.xstream.converters.basic.IntConverter;
+import com.thoughtworks.xstream.converters.basic.JavaClassConverter;
+import com.thoughtworks.xstream.converters.basic.LongConverter;
+import com.thoughtworks.xstream.converters.basic.ShortConverter;
+import com.thoughtworks.xstream.converters.basic.StringBufferConverter;
+import com.thoughtworks.xstream.converters.basic.StringConverter;
+import com.thoughtworks.xstream.converters.collections.ArrayConverter;
+import com.thoughtworks.xstream.converters.collections.CollectionConverter;
+import com.thoughtworks.xstream.converters.collections.MapConverter;
+import com.thoughtworks.xstream.converters.collections.PropertiesConverter;
+import com.thoughtworks.xstream.converters.composite.ObjectWithFieldsConverter;
+import com.thoughtworks.xstream.converters.lookup.DefaultConverterLookup;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.objecttree.reflection.ObjectFactory;
+import com.thoughtworks.xstream.objecttree.reflection.ReflectionObjectGraph;
+import com.thoughtworks.xstream.objecttree.reflection.SunReflectionObjectFactory;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.xml.XMLReaderDriver;
+import com.thoughtworks.xstream.xml.XMLWriter;
+import com.thoughtworks.xstream.xml.dom.DomXMLReaderDriver;
+import com.thoughtworks.xstream.xml.text.PrettyPrintXMLWriter;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
@@ -24,35 +40,23 @@ import java.util.*;
 public class XStream {
 
     protected ConverterLookup converterLookup = new DefaultConverterLookup();
-    protected HierarchicalStreamDriver hierarchicalStreamDriver;
+    protected XMLReaderDriver xmlReaderDriver;
     protected ClassMapper classMapper;
-    protected ReflectionProvider reflectionProvider;
+    protected ObjectFactory objectFactory;
     protected String classAttributeIdentifier;
 
     public XStream() {
-        this(new Sun14ReflectionProvider(), new DefaultClassMapper(new DefaultNameMapper()), new DomDriver());
+        this(new SunReflectionObjectFactory(), new DefaultClassMapper(new DefaultNameMapper()), new DomXMLReaderDriver());
     }
 
-    public XStream(HierarchicalStreamDriver hierarchicalStreamDriver) {
-        this(new Sun14ReflectionProvider(), new DefaultClassMapper(new DefaultNameMapper()), hierarchicalStreamDriver);
+    public XStream(ObjectFactory objectFactory, ClassMapper classMapper, XMLReaderDriver xmlReaderDriver) {
+        this(objectFactory, classMapper, xmlReaderDriver, "class");
     }
 
-    public XStream(ReflectionProvider reflectionProvider) {
-        this(reflectionProvider, new DefaultClassMapper(new DefaultNameMapper()), new DomDriver());
-    }
-
-    public XStream(ReflectionProvider reflectionProvider, HierarchicalStreamDriver hierarchicalStreamDriver) {
-        this(reflectionProvider, new DefaultClassMapper(new DefaultNameMapper()), hierarchicalStreamDriver);
-    }
-
-    public XStream(ReflectionProvider objectFactory, ClassMapper classMapper, HierarchicalStreamDriver driver) {
-        this(objectFactory, classMapper, driver, "class");
-    }
-
-    public XStream(ReflectionProvider objectFactory, ClassMapper classMapper, HierarchicalStreamDriver driver,String classAttributeIdentifier) {
+    public XStream(ObjectFactory objectFactory, ClassMapper classMapper, XMLReaderDriver xmlReaderDriver,String classAttributeIdentifier) {
         this.classMapper = classMapper;
-        this.reflectionProvider = objectFactory;
-        this.hierarchicalStreamDriver = driver;
+        this.objectFactory = objectFactory;
+        this.xmlReaderDriver = xmlReaderDriver;
         this.classAttributeIdentifier = classAttributeIdentifier;
 
         alias("int", Integer.class);
@@ -70,7 +74,6 @@ public class XStream {
         alias("string", String.class);
         alias("java-class", Class.class);
         alias("date", Date.class);
-        alias("bit-set", BitSet.class);
 
         alias("map", Map.class, HashMap.class);
         alias("properties", Properties.class);
@@ -83,7 +86,7 @@ public class XStream {
         alias("tree-set", TreeSet.class);
         alias("hashtable", Hashtable.class);
 
-        registerConverter(new ReflectionConverter(classMapper,classAttributeIdentifier, objectFactory));
+        registerConverter(new ObjectWithFieldsConverter(classMapper,classAttributeIdentifier));
 
         registerConverter(new IntConverter());
         registerConverter(new FloatConverter());
@@ -98,10 +101,8 @@ public class XStream {
         registerConverter(new StringBufferConverter());
         registerConverter(new DateConverter());
         registerConverter(new JavaClassConverter());
-        registerConverter(new BitSetConverter());
 
         registerConverter(new ArrayConverter(classMapper,classAttributeIdentifier));
-        registerConverter(new CharArrayConverter());
         registerConverter(new CollectionConverter(classMapper,classAttributeIdentifier));
         registerConverter(new MapConverter(classMapper,classAttributeIdentifier));
         registerConverter(new PropertiesConverter());
@@ -118,49 +119,46 @@ public class XStream {
 
     public String toXML(Object obj) {
         Writer stringWriter = new StringWriter();
-        HierarchicalStreamWriter writer = new PrettyPrintWriter(stringWriter);
-        marshal(obj, writer);
+        XMLWriter xmlWriter = new PrettyPrintXMLWriter(stringWriter);
+        toXML(obj, xmlWriter);
         return stringWriter.toString();
     }
 
-    public void toXML(Object obj, Writer writer) {
-        marshal(obj, new PrettyPrintWriter(writer));
-    }
-
-    public void marshal(Object obj, HierarchicalStreamWriter writer) {
+    public void toXML(Object obj, XMLWriter xmlWriter) {
+        ObjectTree objectGraph = new ReflectionObjectGraph(obj, objectFactory);
         Converter rootConverter = converterLookup.lookupConverterForType(obj.getClass());
-        writer.startNode(classMapper.lookupName(obj.getClass()));
-        MarshallingContextAdaptor context = new MarshallingContextAdaptor(writer, converterLookup);
-        rootConverter.marshal(obj, writer, context);
-        writer.endNode();
+        xmlWriter.startElement(classMapper.lookupName(obj.getClass()));
+        rootConverter.toXML(objectGraph, xmlWriter, converterLookup);
+        xmlWriter.endElement();
     }
 
     public Object fromXML(String xml) {
-        return fromXML(new StringReader(xml));
+        return fromXML(xmlReaderDriver.createReader(xml));
     }
 
-    public Object fromXML(Reader xml) {
-        return unmarshal(hierarchicalStreamDriver.createReader(xml), null);
-    }
-
-    public Object unmarshal(HierarchicalStreamReader reader) {
-        return unmarshal(reader, null);
-    }
-
-    public Object unmarshal(HierarchicalStreamReader reader, Object root) {
-        String classAttribute = reader.getAttribute(classAttributeIdentifier);
+    public Object fromXML(XMLReader xmlReader) {
+        String classAttribute = xmlReader.attribute(classAttributeIdentifier);
         Class type;
         if (classAttribute == null) {
-            type = classMapper.lookupType(reader.getNodeName());
+            type = classMapper.lookupType(xmlReader.name());
         } else {
             type = classMapper.lookupType(classAttribute);
         }
-        UnmarshallingContextAdaptor context = new UnmarshallingContextAdaptor(root, reader, converterLookup);
-        return context.convertAnother(type);
+        ObjectTree objectGraph = new ReflectionObjectGraph(type, objectFactory);
+        Converter rootConverter = converterLookup.lookupConverterForType(type);
+        rootConverter.fromXML(objectGraph, xmlReader, converterLookup, type);
+        return objectGraph.get();
+    }
+
+    public Object fromXML(XMLReader xmlReader, Object root) {
+        Class type = root.getClass();
+        ObjectTree objectGraph = new ReflectionObjectGraph(root, objectFactory);
+        Converter rootConverter = converterLookup.lookupConverterForType(type);
+        rootConverter.fromXML(objectGraph, xmlReader, converterLookup, type);
+        return objectGraph.get();
     }
 
     public void registerConverter(Converter converter) {
         converterLookup.registerConverter(converter);
     }
-
 }

@@ -1,17 +1,23 @@
 package com.thoughtworks.xstream;
 
 import com.thoughtworks.acceptance.StandardObject;
-import com.thoughtworks.acceptance.someobjects.*;
+import com.thoughtworks.someobjects.FunnyConstructor;
+import com.thoughtworks.someobjects.WithList;
+import com.thoughtworks.someobjects.X;
+import com.thoughtworks.someobjects.Y;
+import com.thoughtworks.someobjects.HandlerManager;
+import com.thoughtworks.someobjects.Handler;
+import com.thoughtworks.someobjects.Protocol;
 import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.xml.Dom4JDriver;
+import com.thoughtworks.xstream.converters.ConverterLookup;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.xml.XMLWriter;
+import com.thoughtworks.xstream.xml.dom4j.Dom4JXMLReaderDriver;
 import junit.framework.TestCase;
 import org.dom4j.Element;
 
-import java.io.StringReader;
+import java.util.List;
 
 public class XStreamTest extends TestCase {
 
@@ -169,9 +175,9 @@ public class XStreamTest extends TestCase {
 
         xstream.alias( "person", Person.class );
 
-        Dom4JDriver driver = new Dom4JDriver();
+        Dom4JXMLReaderDriver driver = new Dom4JXMLReaderDriver();
 
-        Person person = (Person) xstream.unmarshal( driver.createReader( new StringReader(xml) ) );
+        Person person = (Person) xstream.fromXML( driver.createReader( xml ) );
 
         assertEquals( "jason", person.firstName );
 
@@ -188,25 +194,26 @@ public class XStreamTest extends TestCase {
         Element element;
     }
 
-    private class ElementConverter implements Converter {
+    private class ElementConverter
+        implements Converter {
 
         public boolean canConvert( Class type ) {
             return Element.class.isAssignableFrom( type );
         }
 
-        public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+        public void toXML( ObjectTree objectGraph, XMLWriter xmlWriter, ConverterLookup converterLookup ) {
         }
 
-        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        public void fromXML( ObjectTree objectGraph, XMLReader xmlReader, ConverterLookup converterLookup, Class requiredType ) {
 
-            Element element = (Element) reader.peekUnderlyingNode();
+            Element element = (Element) xmlReader.peek();
 
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                reader.moveUp();
+            while ( xmlReader.nextChild() )
+            {
+                xmlReader.pop();
             }
 
-            return element;
+            objectGraph.set( element );
         }
     }
 
@@ -221,13 +228,13 @@ public class XStreamTest extends TestCase {
 
         xstream.alias( "component", Component.class );
 
-        Dom4JDriver driver = new Dom4JDriver();
+        Dom4JXMLReaderDriver driver = new Dom4JXMLReaderDriver();
 
         Component component0 = new Component();
 
-        Component component1 = (Component) xstream.unmarshal( driver.createReader( new StringReader( xml ) ), component0 );
+        Component component1 = (Component) xstream.fromXML( driver.createReader( xml ), component0 );
 
-        assertSame( component0, component1 );
+        assertEquals( component0, component1 );
 
         assertEquals( "host", component0.host );
 
@@ -244,10 +251,10 @@ public class XStreamTest extends TestCase {
         throws Exception {
 
         String xml =
-            "<handlerManager class='com.thoughtworks.acceptance.someobjects.HandlerManager'>" +
+            "<handlerManager class='com.thoughtworks.someobjects.HandlerManager'>" +
             "  <handlers>" +
-            "    <handler class='com.thoughtworks.acceptance.someobjects.Handler'>" +
-            "      <protocol class='com.thoughtworks.acceptance.someobjects.Protocol'>" +
+            "    <handler class='com.thoughtworks.someobjects.Handler'>" +
+            "      <protocol class='com.thoughtworks.someobjects.Protocol'>" +
             "        <id>foo</id> " +
             "      </protocol>  " +
             "    </handler>" +

@@ -1,7 +1,6 @@
 package com.thoughtworks.xstream.converters.collections;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.XppDriver;
 import junit.framework.TestCase;
 
 import java.util.Properties;
@@ -13,12 +12,12 @@ public class PropertiesConverterTest extends TestCase {
         in.setProperty("hello", "world");
         in.setProperty("foo", "cheese");
 
-        XStream xStream = new XStream(new XppDriver());
+        XStream xStream = new XStream();
 
         String expectedXML = "" +
                 "<properties>\n" +
-                "  <property getNodeName=\"hello\" value=\"world\"/>\n" +
-                "  <property getNodeName=\"foo\" value=\"cheese\"/>\n" +
+                "  <property name=\"hello\" value=\"world\"/>\n" +
+                "  <property name=\"foo\" value=\"cheese\"/>\n" +
                 "</properties>";
         String actualXML = xStream.toXML(in);
         assertEquals(expectedXML, actualXML);

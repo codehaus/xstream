@@ -1,10 +1,10 @@
 package com.thoughtworks.xstream.converters.collections;
 
 import com.thoughtworks.xstream.alias.ClassMapper;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.converters.ConverterLookup;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.xml.XMLWriter;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,23 +19,22 @@ public class CollectionConverter extends AbstractCollectionConverter {
         return Collection.class.isAssignableFrom(type);
     }
 
-    public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-        Collection collection = (Collection) source;
+    public void toXML(ObjectTree objectGraph, XMLWriter xmlWriter, ConverterLookup converterLookup) {
+        Collection collection = (Collection) objectGraph.get();
         for (Iterator iterator = collection.iterator(); iterator.hasNext();) {
             Object item = iterator.next();
-            writeItem(item, context, writer);
+            writeItem(item, xmlWriter, converterLookup, objectGraph);
         }
     }
 
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        Collection collection = (Collection) createCollection(context.getRequiredType());
-        while (reader.hasMoreChildren()) {
-            reader.moveDown();
-            Object item = readItem(reader, context);
+    public void fromXML(ObjectTree objectGraph, XMLReader xmlReader, ConverterLookup converterLookup, Class requiredType) {
+        Collection collection = (Collection) createCollection(requiredType);
+        while (xmlReader.nextChild()) {
+            Object item = readItem(xmlReader, objectGraph, converterLookup);
             collection.add(item);
-            reader.moveUp();
+            xmlReader.pop();
         }
-        return collection;
+        objectGraph.set(collection);
     }
 
 }

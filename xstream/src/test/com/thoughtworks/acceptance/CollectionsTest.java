@@ -3,6 +3,7 @@ package com.thoughtworks.acceptance;
 import com.thoughtworks.acceptance.objects.Hardware;
 import com.thoughtworks.acceptance.objects.SampleLists;
 import com.thoughtworks.acceptance.objects.Software;
+import com.thoughtworks.xstream.XStream;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,26 +25,26 @@ public class CollectionsTest extends AbstractAcceptanceTest {
 
         String expected = "" +
                 "<lists>\n" +
-                "  <bad class=\"list\">\n" +
-                "    <software>\n" +
-                "      <name>jserv</name>\n" +
-                "      <vendor>apache</vendor>\n" +
-                "    </software>\n" +
-                "  </bad>\n" +
                 "  <good>\n" +
                 "    <software>\n" +
-                "      <name>geronimo</name>\n" +
                 "      <vendor>apache</vendor>\n" +
+                "      <name>geronimo</name>\n" +
                 "    </software>\n" +
                 "    <software>\n" +
-                "      <name>resin</name>\n" +
                 "      <vendor>caucho</vendor>\n" +
+                "      <name>resin</name>\n" +
                 "    </software>\n" +
                 "    <hardware>\n" +
                 "      <arch>risc</arch>\n" +
                 "      <name>strong-arm</name>\n" +
                 "    </hardware>\n" +
                 "  </good>\n" +
+                "  <bad class=\"list\">\n" +
+                "    <software>\n" +
+                "      <vendor>apache</vendor>\n" +
+                "      <name>jserv</name>\n" +
+                "    </software>\n" +
+                "  </bad>\n" +
                 "</lists>";
 
         assertBothWays(lists, expected);
@@ -59,12 +60,12 @@ public class CollectionsTest extends AbstractAcceptanceTest {
 
         String expected = "" +
                 "<lists>\n" +
-                "  <bad class=\"list\"/>\n" +
                 "  <good>\n" +
                 "    <string>hello</string>\n" +
                 "    <int>3</int>\n" +
                 "    <boolean>true</boolean>\n" +
                 "  </good>\n" +
+                "  <bad class=\"list\"/>\n" +
                 "</lists>";
 
         assertBothWays(lists, expected);

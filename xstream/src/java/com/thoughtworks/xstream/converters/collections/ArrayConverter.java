@@ -1,10 +1,10 @@
 package com.thoughtworks.xstream.converters.collections;
 
 import com.thoughtworks.xstream.alias.ClassMapper;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.converters.ConverterLookup;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.xml.XMLWriter;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
@@ -21,33 +21,33 @@ public class ArrayConverter extends AbstractCollectionConverter {
         return type.isArray();
     }
 
-    public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-        int length = Array.getLength(source);
+    public void toXML(ObjectTree objectGraph, XMLWriter xmlWriter, ConverterLookup converterLookup) {
+        Object array = objectGraph.get();
+        int length = Array.getLength(array);
         for (int i = 0; i < length; i++) {
-            Object item = Array.get(source, i);
-            writeItem(item, context, writer);
+            Object item = Array.get(array, i);
+            writeItem(item, xmlWriter, converterLookup, objectGraph);
         }
     }
 
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+    public void fromXML(ObjectTree objectGraph, XMLReader xmlReader, ConverterLookup converterLookup, Class requiredType) {
         // read the items from xml into a list
         List items = new LinkedList();
-        while (reader.hasMoreChildren()) {
-            reader.moveDown();
-            Object item = readItem(reader, context);
+        while (xmlReader.nextChild()) {
+            Object item = readItem(xmlReader, objectGraph, converterLookup);
             items.add(item);
-            reader.moveUp();
+            xmlReader.pop();
         }
-        // now convertAnother the list into an array
+        // now convert the list into an array
         // (this has to be done as a separate list as the array size is not
         //  known until all items have been read)
-        Object array = Array.newInstance(context.getRequiredType().getComponentType(), items.size());
+        Object array = Array.newInstance(requiredType.getComponentType(), items.size());
         int i = 0;
         for (Iterator iterator = items.iterator(); iterator.hasNext();) {
             Object item = (Object) iterator.next();
             Array.set(array, i, item);
             i++;
         }
-        return array;
+        objectGraph.set(array);
     }
 }

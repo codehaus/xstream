@@ -3,10 +3,10 @@ package com.thoughtworks.xstream.converters.collections;
 import com.thoughtworks.xstream.alias.ClassMapper;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.converters.ConverterLookup;
+import com.thoughtworks.xstream.objecttree.ObjectTree;
+import com.thoughtworks.xstream.xml.XMLReader;
+import com.thoughtworks.xstream.xml.XMLWriter;
 
 public abstract class AbstractCollectionConverter implements Converter {
     protected ClassMapper classMapper;
@@ -19,29 +19,35 @@ public abstract class AbstractCollectionConverter implements Converter {
         this.classAttributeIdentifier = classAttributeIdentifier;
     }
 
-    public abstract void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context);
-    public abstract Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context);
+    public abstract void toXML(ObjectTree objectGraph, XMLWriter xmlWriter, ConverterLookup converterLookup);
 
-    protected void writeItem(Object item, MarshallingContext context, HierarchicalStreamWriter writer) {
+    public abstract void fromXML(ObjectTree objectGraph, XMLReader xmlReader, ConverterLookup converterLookup, Class requiredType);
+
+    protected void writeItem(Object item, XMLWriter xmlWriter, ConverterLookup converterLookup, ObjectTree objectGraph) {
         if (item == null) {
-            writer.startNode("null");
-            writer.endNode();
+            xmlWriter.startElement("null");
+            xmlWriter.endElement();
         } else {
-            writer.startNode(classMapper.lookupName(item.getClass()));
-            context.convertAnother(item);
-            writer.endNode();
+            Class type = item.getClass();
+            xmlWriter.startElement(classMapper.lookupName(type));
+            Converter converter = converterLookup.lookupConverterForType(type);
+            converter.toXML(objectGraph.newStack(item), xmlWriter, converterLookup);
+            xmlWriter.endElement();
         }
     }
 
-    protected Object readItem(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        String classAttribute = reader.getAttribute(classAttributeIdentifier);
+    protected Object readItem(XMLReader xmlReader, ObjectTree objectGraph, ConverterLookup converterLookup) {
+        String classAttribute = xmlReader.attribute(classAttributeIdentifier);
         Class type;
         if (classAttribute == null) {
-            type = classMapper.lookupType(reader.getNodeName());
+            type = classMapper.lookupType(xmlReader.name());
         } else {
             type = classMapper.lookupType(classAttribute);
         }
-        return context.convertAnother(type);
+        ObjectTree itemWriter = objectGraph.newStack(type);
+        Converter converter = converterLookup.lookupConverterForType(type);
+        converter.fromXML(itemWriter, xmlReader, converterLookup, type);
+        return itemWriter.get();
     }
 
     protected Object createCollection(Class type) {
