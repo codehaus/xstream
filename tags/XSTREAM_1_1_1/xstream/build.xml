@@ -1,0 +1,112 @@
+<project name="xstream" default="library">
+
+    <!-- Give user a chance to override specific properties -->
+    <property file="build.properties"/>
+    
+    <property name="version" value="SNAPSHOT"/>
+
+    <property name="java.build.dir" value="build/java"/>
+    <property name="test.build.dir" value="build/test"/>
+    <property name="java.compile.debug" value="yes"/>
+    <property name="test.src.includes" value="**/*Test.java"/>
+    <property name="test.src.excludes" value="**/Abstract*"/>
+    <property name="test.reports.dir" value="build/test-reports"/>
+    <property name="junit.haltonfailure" value="false"/>
+
+    <path id="classpath">
+        <fileset dir="lib"/>
+        <pathelement path="${java.build.dir}"/>
+        <pathelement path="${test.build.dir}"/>
+    </path>
+
+    <target name="library" depends="compile, test, jar" description="Build and test xstream.jar"/>
+
+    <target name="all" depends="clean, library, javadoc, dist" description="Rebuild complete distribution bundle"/>
+
+    <target name="clean" description="Clean up all built files">
+        <delete dir="build"/>
+        <delete dir="javadoc"/>
+    </target>
+
+    <target name="compile" description="Compile all Java">
+        <mkdir dir="${java.build.dir}"/>
+        <javac srcdir="src/java" destdir="${java.build.dir}" debug="${java.compile.debug}">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <target name="test:compile" depends="compile">
+        <mkdir dir="${test.build.dir}"/>
+        <javac srcdir="src/test" destdir="${test.build.dir}">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="test:compile" description="Run all acceptance tests and unit tests">
+        <mkdir dir="${test.reports.dir}"/>
+        <junit printsummary="no" fork="yes" forkmode="once" haltonfailure="${junit.haltonfailure}">
+            <classpath refid="classpath"/>
+            <formatter type="brief" usefile="no"/>
+            <formatter type="xml"/>
+            <batchtest todir="${test.reports.dir}">
+                <fileset dir="src/test">
+                    <include name="${test.src.includes}"/>
+                    <exclude name="${test.src.excludes}"/>
+                </fileset>
+            </batchtest>
+        </junit>
+        <junitreport todir="${test.reports.dir}">
+            <fileset dir="${test.reports.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${test.reports.dir}/html"/>
+        </junitreport>
+        <echo message="Detailed results written to report : ${test.reports.dir}/html/index.html"/>
+    </target>
+
+    <!-- Usage: ant -Dtestcase=com.blah.SomeTest test:single -->
+    <target name="test:single" depends="test:compile" description="Run a single test (specified by property 'testcase')">
+        <junit printsummary="yes" fork="yes" haltonfailure="${junit.haltonfailure}">
+            <classpath refid="classpath"/>
+            <formatter type="plain" usefile="no"/>
+            <test name="${testcase}"/>
+        </junit>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar jarfile="xstream-${version}.jar">
+            <fileset dir="${java.build.dir}"/>
+        </jar>
+    </target>
+
+    <target name="javadoc" description="Build JavaDoc">
+        <mkdir dir="javadoc"/>
+        <javadoc destdir="javadoc" author="true" version="true" use="true" windowtitle="XStream ${version} API">
+            <classpath refid="classpath"/>
+            <packageset dir="src/java" defaultexcludes="yes">
+                <exclude name="com/thoughtworks/xstream/core/**"/>
+                <exclude name="com/thoughtworks/xstream/io/path/**"/>
+                <exclude name="com/thoughtworks/xstream/io/xml/xppdom/**"/>
+            </packageset>
+            <doctitle><![CDATA[<h1>XStream ${version}</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Joe Walnes, <a href="http://xstream.codehaus.org">http://xstream.codehaus.org/</a></i>]]></bottom>
+        </javadoc>
+    </target>
+
+    <target name="dist" depends="jar" description="Build distribution package">
+        <zip zipfile="xstream-${version}.zip">
+            <zipfileset dir="." prefix="xstream-${version}">
+                <include name="build.xml"/>
+                <include name="build.properties"/>
+                <include name="LICENSE.txt"/>
+                <include name="README.txt"/>
+                <include name="src/java/**"/>
+                <include name="src/test/**"/>
+                <include name="lib/**"/>
+                <include name="javadoc/**"/>
+                <include name="xstream-${version}*.jar"/>
+            </zipfileset>
+        </zip>
+    </target>
+
+</project>
