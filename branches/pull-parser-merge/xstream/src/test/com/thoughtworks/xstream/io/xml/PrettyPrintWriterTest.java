@@ -52,4 +52,17 @@ public class PrettyPrintWriterTest extends AbstractXMLWriterTest {
         assertXmlProducedIs(expected);
     }
 
+    public void XXtestAllowsUserToChangeAttributeAndValueEscapingRulesBySubclassing() {
+        writer = new PrettyPrintWriter(buffer, "  ") {
+
+        };
+
+        writer.startNode("evil");
+        writer = new PrettyPrintWriter(buffer, "  ");
+        writer.addAttribute("attr", "<\"> &!;");
+        writer.setValue("w0000 $ <xx> &!;");
+        writer.endNode();
+
+        assertXmlProducedIs("<evil attr=\"w0000 $ &lt;x&quot;x&gt; &amp;!;\">w0000 $ &lt;xx&gt; &amp;!;</evil>");
+    }
 }
