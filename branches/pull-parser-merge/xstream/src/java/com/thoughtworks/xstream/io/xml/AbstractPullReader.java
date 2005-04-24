@@ -1,11 +1,12 @@
 package com.thoughtworks.xstream.io.xml;
 
 import com.thoughtworks.xstream.core.util.FastStack;
-import com.thoughtworks.xstream.core.util.IntQueue;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.AttributeNameIterator;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Base class that contains common functionality across HierarchicalStreamReader implementations
@@ -23,10 +24,13 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
     protected static final int OTHER = 0;
 
     private final FastStack elementStack = new FastStack(16);
-    private final IntQueue lookaheadQueue = new IntQueue(4);
 
-    private boolean hasMoreChildrenCached;
-    private boolean hasMoreChildrenResult;
+    class Event {
+        int type;
+        String value;
+    }
+
+    List q = new ArrayList();
 
     /**
      * Pull the next event from the stream.
@@ -50,18 +54,14 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
     protected abstract String pullText();
 
     public boolean hasMoreChildren() {
-        if (hasMoreChildrenCached) {
-            return hasMoreChildrenResult;
-        }
+        mark();
         while (true) {
-            switch (lookahead()) {
+            switch (readEvent().type) {
                 case START_NODE:
-                    hasMoreChildrenCached = true;
-                    hasMoreChildrenResult = true;
+                    reset();
                     return true;
                 case END_NODE:
-                    hasMoreChildrenCached = true;
-                    hasMoreChildrenResult = false;
+                    reset();
                     return false;
                 default:
                     continue;
@@ -70,10 +70,9 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
     }
 
     public void moveDown() {
-        hasMoreChildrenCached = false;
         int currentDepth = elementStack.size();
         while (elementStack.size() <= currentDepth) {
-            read();
+            move();
             if (elementStack.size() < currentDepth) {
                 throw new RuntimeException(); // sanity check
             }
@@ -81,15 +80,14 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
     }
 
     public void moveUp() {
-        hasMoreChildrenCached = false;
         int currentDepth = elementStack.size();
         while (elementStack.size() >= currentDepth) {
-            read();
+            move();
         }
     }
 
-    private void read() {
-        switch (next()) {
+    private void move() {
+        switch (readEvent().type) {
             case START_NODE:
                 elementStack.push(pullElementName());
                 break;
@@ -99,26 +97,38 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
         }
     }
 
-    private int lookahead() {
-        int event = pullNextEvent();
-        lookaheadQueue.write(event);
-        return event;
-    }
+    int marked;
 
-    private int next() {
-        if (!lookaheadQueue.isEmpty()) {
-            return lookaheadQueue.read();
+    private Event readEvent() {
+        if (marked == -1) {
+            if (q.isEmpty()) {
+                return (Event) q.remove(0);
+            } else {
+                return readRealEvent();
+            }
         } else {
-            return pullNextEvent();
+            // not good
+            return readRealEvent();
         }
     }
 
+    private Event readRealEvent() {
+        Event event = new Event();
+        event.type = pullNextEvent();
+        if (event.type == TEXT) {
+            event.value = pullText();
+        } else if (event.type == START_NODE) {
+            event.value = pullElementName();
+        }
+        return event;
+    }
+
     private void mark() {
-        throw new UnsupportedOperationException();
+        marked = q.size();
     }
 
     private void reset() {
-        throw new UnsupportedOperationException();
+        marked = -1;
     }
 
     public String getValue() {
@@ -131,10 +141,10 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
         StringBuffer buffer = null;
 
         mark();
-        int value = lookahead();
+        Event event = readEvent();
         while (true) {
-            if (value == TEXT) {
-                String text = pullText();
+            if (event.type == TEXT) {
+                String text = event.value;
                 if (text != null && text.length() > 0) {
                     if (last == null) {
                         last = text;
@@ -145,16 +155,10 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
                         buffer.append(text);
                     }
                 }
-            } else if (value == END_NODE) {
-                // if we lookahead and see the end of an element, we should remember there's no more children,
-                // as the hasMoreChildren() call will skip what we've just read.
-                hasMoreChildrenCached = true;
-                hasMoreChildrenResult = false;
-                break;
-            } else if (value != COMMENT) {
+            } else if (event.type != COMMENT) {
                 break;
             }
-            value = lookahead();
+            event = readEvent();
         }
         reset();
         if (buffer != null) {
