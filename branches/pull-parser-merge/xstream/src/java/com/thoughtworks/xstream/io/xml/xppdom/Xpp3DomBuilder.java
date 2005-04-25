@@ -14,7 +14,7 @@ public class Xpp3DomBuilder {
 
         List values = new ArrayList();
 
-        Xpp3Dom configuration = null;
+        Xpp3Dom node = null;
 
         XmlPullParser parser = new MXParser();
 
@@ -26,7 +26,7 @@ public class Xpp3DomBuilder {
             if (eventType == XmlPullParser.START_TAG) {
                 String rawName = parser.getName();
 
-                Xpp3Dom childConfiguration = createConfiguration(rawName);
+                Xpp3Dom childConfiguration = new Xpp3Dom(rawName);
 
                 int depth = elements.size();
 
@@ -75,7 +75,7 @@ public class Xpp3DomBuilder {
                 }
 
                 if (0 == depth) {
-                    configuration = finishedConfiguration;
+                    node = finishedConfiguration;
                 }
             }
 
@@ -84,10 +84,7 @@ public class Xpp3DomBuilder {
 
         reader.close();
 
-        return configuration;
+        return node;
     }
 
-    private static Xpp3Dom createConfiguration(String localName) {
-        return new Xpp3Dom(localName);
-    }
 }
