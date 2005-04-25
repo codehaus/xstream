@@ -62,17 +62,15 @@ public class Xpp3DomBuilder {
 
                 String accumulatedValue = (values.remove(depth)).toString();
 
-                if (finalNode.getChildCount() == 0) {
-                    String finishedValue;
+                String finishedValue;
 
-                    if (0 == accumulatedValue.length()) {
-                        finishedValue = null;
-                    } else {
-                        finishedValue = accumulatedValue;
-                    }
-
-                    finalNode.setValue(finishedValue);
+                if (0 == accumulatedValue.length()) {
+                    finishedValue = null;
+                } else {
+                    finishedValue = accumulatedValue;
                 }
+
+                finalNode.setValue(finishedValue);
 
                 if (0 == depth) {
                     node = finalNode;
