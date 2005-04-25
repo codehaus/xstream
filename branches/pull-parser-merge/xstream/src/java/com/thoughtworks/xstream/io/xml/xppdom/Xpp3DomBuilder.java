@@ -26,17 +26,17 @@ public class Xpp3DomBuilder {
             if (eventType == XmlPullParser.START_TAG) {
                 String rawName = parser.getName();
 
-                Xpp3Dom childConfiguration = new Xpp3Dom(rawName);
+                Xpp3Dom child = new Xpp3Dom(rawName);
 
                 int depth = elements.size();
 
                 if (depth > 0) {
                     Xpp3Dom parent = (Xpp3Dom) elements.get(depth - 1);
 
-                    parent.addChild(childConfiguration);
+                    parent.addChild(child);
                 }
 
-                elements.add(childConfiguration);
+                elements.add(child);
 
                 values.add(new StringBuffer());
 
@@ -47,7 +47,7 @@ public class Xpp3DomBuilder {
 
                     String value = parser.getAttributeValue(i);
 
-                    childConfiguration.setAttribute(name, value);
+                    child.setAttribute(name, value);
                 }
             } else if (eventType == XmlPullParser.TEXT) {
                 int depth = values.size() - 1;
@@ -58,11 +58,11 @@ public class Xpp3DomBuilder {
             } else if (eventType == XmlPullParser.END_TAG) {
                 int depth = elements.size() - 1;
 
-                Xpp3Dom finishedConfiguration = (Xpp3Dom) elements.remove(depth);
+                Xpp3Dom finalNode = (Xpp3Dom) elements.remove(depth);
 
                 String accumulatedValue = (values.remove(depth)).toString();
 
-                if (finishedConfiguration.getChildCount() == 0) {
+                if (finalNode.getChildCount() == 0) {
                     String finishedValue;
 
                     if (0 == accumulatedValue.length()) {
@@ -71,11 +71,11 @@ public class Xpp3DomBuilder {
                         finishedValue = accumulatedValue;
                     }
 
-                    finishedConfiguration.setValue(finishedValue);
+                    finalNode.setValue(finishedValue);
                 }
 
                 if (0 == depth) {
-                    node = finishedConfiguration;
+                    node = finalNode;
                 }
             }
 
