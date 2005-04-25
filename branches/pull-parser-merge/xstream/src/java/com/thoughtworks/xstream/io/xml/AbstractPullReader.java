@@ -4,9 +4,7 @@ import com.thoughtworks.xstream.core.util.FastStack;
 import com.thoughtworks.xstream.io.AttributeNameIterator;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Base class that contains common functionality across HierarchicalStreamReader implementations
@@ -25,12 +23,14 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
 
     private final FastStack elementStack = new FastStack(16);
 
-    class Event {
+    private final FastStack lookahead = new FastStack(4);
+    private final FastStack lookback = new FastStack(4);
+    private boolean marked;
+
+    private static class Event {
         int type;
         String value;
     }
-
-    List q = new ArrayList();
 
     /**
      * Pull the next event from the stream.
@@ -97,18 +97,19 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
         }
     }
 
-    int marked;
-
     private Event readEvent() {
-        if (marked == -1) {
-            if (q.isEmpty()) {
-                return (Event) q.remove(0);
+        if (marked) {
+            if (lookback.hasStuff()) {
+                return (Event) lookahead.push(lookback.pop());
+            } else {
+                return (Event) lookahead.push(readRealEvent());
+            }
+        } else {
+            if (lookback.hasStuff()) {
+                return (Event) lookback.pop();
             } else {
                 return readRealEvent();
             }
-        } else {
-            // not good
-            return readRealEvent();
         }
     }
 
@@ -123,12 +124,15 @@ public abstract class AbstractPullReader implements HierarchicalStreamReader {
         return event;
     }
 
-    private void mark() {
-        marked = q.size();
+    public void mark() {
+        marked = true;
     }
 
-    private void reset() {
-        marked = -1;
+    public void reset() {
+        while(lookahead.hasStuff()) {
+            lookback.push(lookahead.pop());
+        }
+        marked = false;
     }
 
     public String getValue() {
