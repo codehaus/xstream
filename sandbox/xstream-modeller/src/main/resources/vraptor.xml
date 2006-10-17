@@ -1,0 +1,3 @@
+<vraptor>
+	<regex-view-manager>/$1.$2.ftl</regex-view-manager>
+</vraptor>
