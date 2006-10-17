@@ -8,12 +8,6 @@ import org.codehaus.xstream.modeller.dom.Element;
 
 public class ModelGenerator {
 
-	private final String basePackage;
-
-	public ModelGenerator(String basePackage) {
-		this.basePackage = basePackage;
-	}
-
 	public void printTypes(Graph graph) {
 
 		Collection<XNode> nodes = graph.getElements();
@@ -22,7 +16,7 @@ public class ModelGenerator {
 			if (type.isImplicitCollection()) {
 				continue;
 			}
-			System.out.println(type.getCode(basePackage));
+			System.out.println(type.getCode());
 			System.out.println();
 		}
 

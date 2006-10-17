@@ -69,12 +69,9 @@ public class Element implements NodeType {
 				+ name + " so it cannot be an attribute.");
 	}
 
-	public String getCode(String pkg) {
+	public String getCode() {
 		// TODO stringbuffer
 		String code = "";
-		if (!pkg.equals("")) {
-			code += "package " + pkg + ";\n\n";
-		}
 		code += "public class " + tipify(name) + " {\n";
 		for (XNode child : children) {
 			code += child.getType().getCodeAsMember(quantity.get(child));
