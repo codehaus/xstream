@@ -1,6 +1,6 @@
 <form action="webModeller.translate.logic" id="myForm">
 Enter your xml in the following box:<br/>
-<textarea cols="80" rows="10" name="xml">${xml!"<book>
+<textarea cols="100" rows="30" name="xml">${xml!"<book>
 	<authors>
 		<author>
 			<name>Guilherme Silveira</name>

@@ -18,6 +18,10 @@ public class WebModeller {
 
 	private Graph graph;
 
+	@Out
+	// should be injected in the app scope instead of this out annotation
+	private Java2HtmlTransformer html = new Java2HtmlTransformer();
+
 	@Parameter
 	private String xml;
 

@@ -2,16 +2,10 @@
 
 <html>
 
-	<#include "form.ftl"/>
-	
-	<hr/>
-	
-Java model:
-
-	<hr/>
-
 Custom xstream instance:<br/>
-<textarea cols="80" rows="10">public class CustomXStream extends XStream {
+
+<@html>
+public class CustomXStream extends XStream {
 
 	public CustomXStream() {
 	
@@ -39,6 +33,15 @@ Custom xstream instance:<br/>
 	}
 
 }
-</textarea>
+</@html>
 
+	<hr/>
+
+	Java model:
+
+	<hr/>
+
+	<#include "form.ftl"/>
+	
+	
 </html>
