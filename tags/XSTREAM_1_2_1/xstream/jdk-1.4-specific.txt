@@ -1,0 +1,26 @@
+# The following patterns are files that should not be compiled or tested by the build, UNLESS using JDK 1.4 or greater.
+
+com/thoughtworks/xstream/converters/extended/Charset*
+com/thoughtworks/xstream/converters/extended/Currency*
+com/thoughtworks/xstream/converters/extended/RegexPattern*
+com/thoughtworks/xstream/converters/extended/StackTrace*
+com/thoughtworks/xstream/converters/extended/Subject*
+com/thoughtworks/xstream/converters/extended/Throwable*
+com/thoughtworks/xstream/converters/reflection/Sun14ReflectionProvider*
+
+com/thoughtworks/acceptance/AbsoluteXPathNestedCircularReferenceTest*
+com/thoughtworks/acceptance/CollectionsTest*
+com/thoughtworks/acceptance/CustomMapperTest*
+com/thoughtworks/acceptance/Extended14TypesTest*
+com/thoughtworks/acceptance/FinalFieldsTest*
+com/thoughtworks/acceptance/IDNestedCircularReferenceTest*
+com/thoughtworks/acceptance/InnerClassesTest*
+com/thoughtworks/acceptance/MapTest*
+com/thoughtworks/acceptance/QNameMappedConcreteClassesTest*
+com/thoughtworks/acceptance/RelativeXPathNestedCircularReferenceTest*
+com/thoughtworks/acceptance/SerializationNestedWriteObjectsTest*
+com/thoughtworks/acceptance/SwingTest*
+com/thoughtworks/acceptance/XStreamerTest*
+com/thoughtworks/xstream/converters/extended/FontConverterTest*
+
+
