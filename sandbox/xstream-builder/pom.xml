@@ -1,7 +1,7 @@
 <?xml version="1.0"?><project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.xstream</groupId>
-  <artifactId>builder</artifactId>
+  <artifactId>xstream-builder</artifactId>
   <packaging>jar</packaging>
   <name>builder package for xstream</name>
   <version>SNAPSHOT</version>
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.2.2-SNAPSHOT</version>
+      <version>1.2.2</version>
     </dependency>
 	<dependency>
 		<groupId>junit</groupId>
