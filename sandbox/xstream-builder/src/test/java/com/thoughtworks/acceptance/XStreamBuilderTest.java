@@ -1,41 +1,32 @@
 package com.thoughtworks.acceptance;
 
-import com.thoughtworks.xstream.builder.XStreamBuilder;
-import com.thoughtworks.xstream.builder.XStreamClassConfig;
+import java.util.Collection;
+import java.util.HashSet;
+
 import com.thoughtworks.xstream.ReadOnlyXStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.builder.XStreamBuilder;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.HashSet;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
  * @author Guilherme Silveira
  */
 public class XStreamBuilderTest extends AbstractAcceptanceTest {
-    private XStreamBuilder builder;
 
-    public void setUp() {
-        builder = new XStreamBuilder();
-    }
+    public void testSupportsBuildStyleWithAlias() {
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(Office.class).with(alias("office"));
+            }
+        };
 
-    public static class House {
-    }
-
-    public void testHandleCorrectlyClassAliases() {
-
-        builder.handle(House.class).as("house");
-
-        House house = new House();
-        String expected = "<house/>";
-                          
-        assertBothWays(builder.buildXStream(), house, expected);
-
+        Office office = new Office("Rua Vergueiro");
+        String expected = "<office>\n  <address>Rua Vergueiro</address>\n</office>";
+        assertBothWays(builder.buildXStream(), office, expected);
     }
 
     public static class Office {
@@ -47,12 +38,15 @@ public class XStreamBuilderTest extends AbstractAcceptanceTest {
 
     public void testHandleCorrectlyFieldAliases() {
 
-        XStreamClassConfig officeConf = builder.handle(Office.class).as("office");
-        officeConf.handle("address").as("logradouro");
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(Office.class).with(alias("office"),
+                							field("address").with(as("logradouro")));
+            }
+        };
 
         Office office = new Office("Rua Vergueiro");
         String expected = "<office>\n  <logradouro>Rua Vergueiro</logradouro>\n</office>";
-
         assertBothWays(builder.buildXStream(), office, expected);
 
     }
@@ -74,20 +68,29 @@ public class XStreamBuilderTest extends AbstractAcceptanceTest {
 
     public void testHandleCorrectlyFieldOmmission() {
 
-        XStreamClassConfig officeConf = builder.handle(Office.class).as("office");
-        officeConf.ignores("address");
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(Office.class).with(alias("office"),
+                							ignores("address")
+                							// TODO "decision: could be" field("address").with(ignored())
+                							);
+            }
+        };
 
         Office office = new Office("Rua Vergueiro");
         String expected = "<office/>";
-
         assertBothWays(builder.buildXStream(), office, expected);
 
     }
 
     public void testHandleCorrectlyAttributes() {
 
-        XStreamClassConfig officeConf = builder.handle(Office.class).as("office");
-        officeConf.handle("address").asAttribute().as("logradouro");
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(Office.class).with(alias("office"));
+                // TODO decide how to alias attribute to logradouro
+            }
+        };
 
         Office office = new Office("Rua Vergueiro");
         String expected = "<office logradouro=\"Rua Vergueiro\"/>";
@@ -102,8 +105,12 @@ public class XStreamBuilderTest extends AbstractAcceptanceTest {
 
     public void testHandleCorrectlyDefaultImplementations() {
 
-        XStreamClassConfig officeConf = builder.handle(Collection.class).implementedBy(HashSet.class);
-        builder.handle(CollectionContainer.class).as("cc");
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(Collection.class).with(implementedBy(HashSet.class));
+                handle(CollectionContainer.class).with(alias("cc"));
+            }
+        };
 
         CollectionContainer root = new CollectionContainer();
         root.collection = new HashSet();
@@ -142,8 +149,12 @@ public class XStreamBuilderTest extends AbstractAcceptanceTest {
 
     public void testHandleCorrectlyConverterRegistrations() {
 
-        XStreamClassConfig officeConf = builder.handle(CollectionContainer.class).as("cc");
-        builder.register(new DoNothingConverter(CollectionContainer.class));
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(CollectionContainer.class).with(alias("cc"));
+                register(converter(new DoNothingConverter(CollectionContainer.class)));
+            }
+        };
 
         CollectionContainer root = new CollectionContainer();
         root.collection = new HashSet();
@@ -159,7 +170,11 @@ public class XStreamBuilderTest extends AbstractAcceptanceTest {
 
     public void testHandleCorrectlyAnnotatedClasses() {
 
-        builder.handle(Annotated.class).annotated();
+        XStreamBuilder builder = new XStreamBuilder() {
+            {
+                handle(Annotated.class).with(annotated());
+            }
+        };
 
         Annotated root = new Annotated();
         String expected = "<annotated/>";
