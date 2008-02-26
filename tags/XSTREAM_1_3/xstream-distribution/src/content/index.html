@@ -1,0 +1,105 @@
+<html>
+<!--
+ Copyright (C) 2005, 2006 Joe Walnes.
+ Copyright (C) 2006, 2007 XStream committers.
+ All rights reserved.
+ 
+ The software in this package is published under the terms of the BSD
+ style license a copy of which has been included with this distribution in
+ the LICENSE.txt file.
+ 
+ Created on 29. January 2005 by Joe Walnes
+ -->
+  <head>
+    <title>Java to XML serialization, and back again</title>
+    <meta name="short" content="About XStream"/>
+  </head>
+
+  <body>
+
+    <p>XStream is a simple library to serialize objects to XML and back again.</p>
+
+    <h1 id="features">Features</h1>
+
+    <ul>
+        <li><b>Ease of use.</b> A high level facade is supplied that simplifies common use cases.</li>
+        <li><b>No mappings required.</b> Most objects can be serialized without need for specifying mappings.</li>
+        <li><b>Performance.</b> Speed and low memory footprint are a crucial part of the design, making it suitable for
+        large object graphs or systems with high message throughput.</li>
+        <li><b>Clean XML.</b> No information is duplicated that can be obtained via reflection. This results
+        in XML that is easier to read for humans and more compact than native Java serialization.</li>
+        <li><b>Requires no modifications to objects.</b> Serializes internal fields, including private and
+        final. Supports non-public and inner classes. Classes are not required to have default constructor.</li>
+        <li><b>Full object graph support.</b> Duplicate references encountered in the object-model will
+        be maintained. Supports circular references.</li>
+        <li><b>Integrates with other XML APIs.</b> By implementing an interface, XStream can serialize
+        directly to/from any tree structure (not just XML).</li>
+        <li><b>Customizable conversion strategies.</b> Strategies can be registered allowing customization of how
+        particular types are represented as XML.</li>
+        <li><b>Error messages.</b> When an exception occurs due to malformed XML, detailed diagnostics are provided
+        to help isolate and fix the problem.</li>
+        <li><b>Alternative output format.</b> The modular design allows other output formats. XStream ships currently
+        with JSON support and morphing.</li>
+    </ul>
+
+    <h1 id="use-cases">Typical Uses</h1>
+
+    <ul>
+        <li><b>Transport</b></li>
+        <li><b>Persistence</b></li>
+        <li><b>Configuration</b></li>
+        <li><b>Unit Tests</b></li>
+    </ul>
+
+    <h1 id="limitations">Known Limitations</h1>
+
+    <p>If using the enhanced mode, XStream can re-instantiate classes that do not have a default constructor. 
+    However, if using a different JVM like an old JRockit version, a JDK 1.3 or you have restrictions because of a 
+    SecurityManager, a default constructor is required.</p>
+
+    <p>The enhanced mode is also necessary to restore final fields for any JDK &lt; 1.5. This implies deserialization of
+    instances of an inner class.</p>
+
+    <p>Auto-detection of annotations may cause race conditions. Preprocessing annotations is safe though.</p>
+
+    <h1 id="getting-started">Getting Started</h1>
+
+    <ul>
+      <li><a href="download.html">Download it</a>.</li>
+      <li><a href="tutorial.html">Use it</a>.</li>
+    </ul>
+
+    <h1 id="news">Latest News</h1>
+
+    <h2><b>February 27, 2008</b> XStream 1.3 released</h2>
+    
+      <p>The XStream committers proudly present XStream 1.3.  This release contains some major
+      refactorings concerning Java annotations, improved XML support regarding encoding and 
+      character sets, some minor new features, deprecations and a lot of bug fixes:</p>
+      
+	  <ul>
+        <li>Annotation support is now implemented as Mapper and Annotations can either be processed
+        in advance or on-the-fly (see <a href="annotations-tutorial.html#AutoDetect">Annotations tutorial</a>
+        for limitations).</li>
+        <li>Improved encoding support for JSON and XML (including automated  support for XML headers).
+        Enforceable check for valid XML characters in the written stream.</li>
+        <li>Dedicated converters can now be configured for individual fields also using the XStream facade.</li>
+        <li>New converters for java.lang.StringBuilder, java.util.UUID, javax.xml.datatype.Duration,
+         and javax.swing.LookAndFeel. New generic converter for types using a java.beans.PropertyEditor.
+         Auto-instantiated SingleValueConverter for Java enums to support enum values as attributes.</li>
+        <li>XML elements are now sorted by default according their declaration with the fields defined in parent
+        classes first to improve support for type hierarchies in XML schemata.</li>
+        <li>A lot of bug fixes to improve JSON support for arbitrary types. Added section in 
+        <a href="faq.html#JSON">FAQ</a> for limitations and operation modes.</li>
+        <li>Native support for SAP VM.</li>
+        <li>All text-based files are now shipped with an appropriate license header to clean-up legal issues.</li>
+   	  </ul>
+   	  
+      <p>View the complete <a href="changes.html">change log</a> and <a href="download.html">download</a>.</p>
+
+    <p class="highlight">Note, to support a representation of null values in some way, it is absolutely necessary that each converter can handle a null
+    value in its marshalling methods.  If you have implemented your own custom converters, try to handle such a case also to prevent incompatibilities
+    in case XStream will provide such values with its next major version.</p>
+
+  </body>
+</html>
