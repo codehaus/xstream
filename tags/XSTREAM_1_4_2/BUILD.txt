@@ -1,0 +1,16 @@
+Building with Maven 2 or 3
+
+Requires at least Maven 2.0.11
+
+Before building:
+
+To build:
+
+mvn clean install
+
+Before deploying:
+
+copy settings-template.xml to ~/.m2/settings.xml adding your Codehaus DAV username and passwords.
+
+To deploy (optionally adding sources and javadoc jars):
+mvn deploy
