@@ -22,10 +22,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
 
 public class SwingTest extends AbstractAcceptanceTest {
 
-    @Override
     protected void setupSecurity(XStream xstream) {
         super.setupSecurity(xstream);
-        xstream.allowTypesByWildcard("javax.swing.**", "java.awt.**", "java.beans.**", "sun.swing.**");
+        xstream.allowTypesByWildcard(new String[]{"javax.swing.**", "java.awt.**", "java.beans.**", "sun.swing.**"});
     }
 
     // JTable is one of the nastiest components to serialize. If this works, we're in good shape :)

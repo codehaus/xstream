@@ -14,7 +14,7 @@
   <parent>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.4.7</version>
   </parent>
   <artifactId>xstream</artifactId>
   <packaging>jar</packaging>
@@ -305,12 +305,14 @@
                 <exclude>**/enums/*</exclude>
                 <exclude>**/basic/StringBuilder*</exclude>
                 <exclude>**/basic/UUID*</exclude>
+                <exclude>**/extended/*15*</exclude>
                 <exclude>**/io/xml/JDom2*</exclude>
               </excludes>
               <testExcludes>
                 <exclude>**/annotations/*</exclude>
                 <exclude>**/enums/*</exclude>
                 <exclude>**/extended/*17Test*</exclude>
+                <exclude>**/reflection/SunLimitedUnsafeReflectionProviderTest*</exclude>
                 <exclude>**/reflection/PureJavaReflectionProvider15Test*</exclude>
                 <exclude>**/io/xml/JDom2*Test*</exclude>
                 <exclude>**/acceptance/Basic15TypesTest*</exclude>

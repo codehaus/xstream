@@ -27,7 +27,7 @@ public class JodaTimeTypesTest extends AbstractAcceptanceTest {
             // inner class, must use enhanced mode for this test
             return;
         }
-        xstream.allowTypesByWildcard("org.joda.time.**");
+        xstream.allowTypesByWildcard(new String[]{"org.joda.time.**"});
         DateTimeZone.setDefault(DateTimeZone.forID("America/Los_Angeles"));
         final LocalDate localDate = new LocalDate(2008, 07, 03);
         final String expected = "" +

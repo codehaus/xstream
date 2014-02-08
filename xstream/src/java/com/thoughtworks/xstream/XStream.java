@@ -26,21 +26,15 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -53,10 +47,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -149,13 +141,9 @@ import com.thoughtworks.xstream.mapper.SecurityMapper;
 import com.thoughtworks.xstream.mapper.SystemAttributeAliasingMapper;
 import com.thoughtworks.xstream.mapper.XStream11XmlFriendlyMapper;
 import com.thoughtworks.xstream.security.AnyTypePermission;
-import com.thoughtworks.xstream.security.ArrayTypePermission;
 import com.thoughtworks.xstream.security.ExplicitTypePermission;
-import com.thoughtworks.xstream.security.InterfaceTypePermission;
 import com.thoughtworks.xstream.security.NoPermission;
 import com.thoughtworks.xstream.security.NoTypePermission;
-import com.thoughtworks.xstream.security.NullPermission;
-import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 import com.thoughtworks.xstream.security.RegExpTypePermission;
 import com.thoughtworks.xstream.security.TypeHierarchyPermission;
 import com.thoughtworks.xstream.security.TypePermission;
@@ -359,7 +347,7 @@ public class XStream {
      * @throws InitializationException in case of an initialization problem
      */
     public XStream() {
-        this(new XppDriver());
+        this(null, (Mapper)null, new XppDriver());
     }
 
     /**
@@ -373,7 +361,7 @@ public class XStream {
      * @throws InitializationException in case of an initialization problem
      */
     public XStream(ReflectionProvider reflectionProvider) {
-        this(reflectionProvider, new XppDriver());
+        this(reflectionProvider, (Mapper)null, new XppDriver());
     }
 
     /**
@@ -387,7 +375,7 @@ public class XStream {
      * @throws InitializationException in case of an initialization problem
      */
     public XStream(HierarchicalStreamDriver hierarchicalStreamDriver) {
-        this(null, hierarchicalStreamDriver);
+        this(null, (Mapper)null, hierarchicalStreamDriver);
     }
 
     /**
@@ -401,7 +389,26 @@ public class XStream {
      */
     public XStream(
         ReflectionProvider reflectionProvider, HierarchicalStreamDriver hierarchicalStreamDriver) {
-        this(reflectionProvider, hierarchicalStreamDriver, new ClassLoaderReference(new CompositeClassLoader()));
+        this(reflectionProvider, (Mapper)null, hierarchicalStreamDriver);
+    }
+
+    /**
+     * Constructs an XStream with a special {@link HierarchicalStreamDriver},
+     * {@link ReflectionProvider} and a prepared {@link Mapper} chain.
+     * 
+     * @param reflectionProvider the reflection provider to use or <em>null</em> for best
+     *            matching Provider
+     * @param mapper the instance with the {@link Mapper} chain or <em>null</em> for the default
+     *            chain
+     * @param driver the driver instance
+     * @throws InitializationException in case of an initialization problem
+     * @deprecated As of 1.3, use
+     *             {@link #XStream(ReflectionProvider, HierarchicalStreamDriver, ClassLoader, Mapper)}
+     *             instead
+     */
+    public XStream(
+        ReflectionProvider reflectionProvider, Mapper mapper, HierarchicalStreamDriver driver) {
+        this(reflectionProvider, driver, new CompositeClassLoader(), mapper);
     }
 
     /**
@@ -657,31 +664,7 @@ public class XStream {
             return;
         }
         
-        addPermission(NullPermission.NULL);
-        addPermission(PrimitiveTypePermission.PRIMITIVES);
-        addPermission(ArrayTypePermission.ARRAYS);
-        addPermission(InterfaceTypePermission.INTERFACES);
-        allowTypeHierarchy(Calendar.class);
-        allowTypeHierarchy(Collection.class);
-        allowTypeHierarchy(Enum.class);
-        allowTypeHierarchy(Map.class);
-        allowTypeHierarchy(Map.Entry.class);
-        allowTypeHierarchy(Member.class);
-        allowTypeHierarchy(Number.class);
-        allowTypeHierarchy(Throwable.class);
-        allowTypeHierarchy(TimeZone.class);
-        
-        Set<Class<?>> types = new HashSet<Class<?>>();
-        types.addAll(Arrays.<Class<?>>asList(BitSet.class, Charset.class, Class.class, Currency.class, Date.class,
-            DecimalFormatSymbols.class, File.class, Locale.class, Object.class, Pattern.class, StackTraceElement.class,
-            String.class, StringBuffer.class, StringBuilder.class, URL.class, URI.class, UUID.class));
-        if (JVM.isSQLAvailable()) {
-            types.add(JVM.loadClassForName("java.sql.Timestamp"));
-            types.add(JVM.loadClassForName("java.sql.Time"));
-            types.add(JVM.loadClassForName("java.sql.Date"));
-        }
-        types.remove(null);
-        allowTypes(types.toArray(new Class[types.size()]));
+        addPermission(AnyTypePermission.ANY);
     }
 
     protected void setupAliases() {
@@ -2037,7 +2020,7 @@ public class XStream {
      * @param names the type names to allow
      * @since 1.4.7
      */
-    public void allowTypes(String... names) {
+    public void allowTypes(String[] names) {
         addPermission(new ExplicitTypePermission(names));
     }
     
@@ -2047,7 +2030,7 @@ public class XStream {
      * @param types the types to allow
      * @since 1.4.7
      */
-    public void allowTypes(Class<?>... types) {
+    public void allowTypes(Class[] types) {
         addPermission(new ExplicitTypePermission(types));
     }
     
@@ -2057,7 +2040,7 @@ public class XStream {
      * @param type the base type to allow
      * @since 1.4.7
      */
-    public void allowTypeHierarchy(Class<?> type) {
+    public void allowTypeHierarchy(Class type) {
         addPermission(new TypeHierarchyPermission(type));
     }
     
@@ -2067,7 +2050,7 @@ public class XStream {
      * @param regexps the regular expressions to allow type names
      * @since 1.4.7
      */
-    public void allowTypesByRegExp(String... regexps) {
+    public void allowTypesByRegExp(String[] regexps) {
         addPermission(new RegExpTypePermission(regexps));
     }
     
@@ -2077,7 +2060,7 @@ public class XStream {
      * @param regexps the regular expressions to allow type names
      * @since 1.4.7
      */
-    public void allowTypesByRegExp(Pattern... regexps) {
+    public void allowTypesByRegExp(Pattern[] regexps) {
         addPermission(new RegExpTypePermission(regexps));
     }
     
@@ -2095,7 +2078,7 @@ public class XStream {
      * @param patterns the patterns to allow type names
      * @since 1.4.7
      */
-    public void allowTypesByWildcard(String... patterns) {
+    public void allowTypesByWildcard(String[] patterns) {
         addPermission(new WildcardTypePermission(patterns));
     }
     
@@ -2115,7 +2098,7 @@ public class XStream {
      * @param names the type names to forbid
      * @since 1.4.7
      */
-    public void denyTypes(String... names) {
+    public void denyTypes(String[] names) {
         denyPermission(new ExplicitTypePermission(names));
     }
     
@@ -2125,7 +2108,7 @@ public class XStream {
      * @param types the types to forbid
      * @since 1.4.7
      */
-    public void denyTypes(Class<?>... types) {
+    public void denyTypes(Class[] types) {
         denyPermission(new ExplicitTypePermission(types));
     }
     
@@ -2135,7 +2118,7 @@ public class XStream {
      * @param type the base type to forbid
      * @since 1.4.7
      */
-    public void denyTypeHierarchy(Class<?> type) {
+    public void denyTypeHierarchy(Class type) {
         denyPermission(new TypeHierarchyPermission(type));
     }
     
@@ -2145,7 +2128,7 @@ public class XStream {
      * @param regexps the regular expressions to forbid type names
      * @since 1.4.7
      */
-    public void denyTypesByRegExp(String... regexps) {
+    public void denyTypesByRegExp(String[] regexps) {
         denyPermission(new RegExpTypePermission(regexps));
     }
     
@@ -2155,7 +2138,7 @@ public class XStream {
      * @param regexps the regular expressions to forbid type names
      * @since 1.4.7
      */
-    public void denyTypesByRegExp(Pattern... regexps) {
+    public void denyTypesByRegExp(Pattern[] regexps) {
         denyPermission(new RegExpTypePermission(regexps));
     }
     
@@ -2173,7 +2156,31 @@ public class XStream {
      * @param patterns the patterns to forbid names
      * @since 1.4.7
      */
-    public void denyTypesByWildcard(String... patterns) {
+    public void denyTypesByWildcard(String[] patterns) {
         denyPermission(new WildcardTypePermission(patterns));
+    }
+
+    /**
+     * @deprecated As of 1.3, use {@link com.thoughtworks.xstream.InitializationException}
+     *             instead
+     */
+    public static class InitializationException extends XStreamException {
+        /**
+         * @deprecated As of 1.3, use
+         *             {@link com.thoughtworks.xstream.InitializationException#InitializationException(String, Throwable)}
+         *             instead
+         */
+        public InitializationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        /**
+         * @deprecated As of 1.3, use
+         *             {@link com.thoughtworks.xstream.InitializationException#InitializationException(String)}
+         *             instead
+         */
+        public InitializationException(String message) {
+            super(message);
+        }
     }
 }

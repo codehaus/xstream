@@ -164,7 +164,7 @@ public class OmitFieldsTest extends AbstractAcceptanceTest {
             }
         };
 
-        xstream.allowTypes(AnotherThing.class);
+        xstream.allowTypes(new Class[]{AnotherThing.class});
         xstream.alias("thing", AnotherThing.class);
 
         String actualXml = xstream.toXML(in);

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005, 2006 Joe Walnes.
- * Copyright (C) 2006, 2007, 2008, 2009, 2013 XStream Committers.
+ * Copyright (C) 2006, 2007, 2008, 2009 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -74,6 +74,27 @@ public abstract class MapperWrapper implements Mapper {
         return wrapped.shouldSerializeMember(definedIn, fieldName);
     }
 
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
+     */
+    public SingleValueConverter getConverterFromItemType(String fieldName, Class type) {
+        return wrapped.getConverterFromItemType(fieldName, type);
+    }
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
+     */
+    public SingleValueConverter getConverterFromItemType(Class type) {
+        return wrapped.getConverterFromItemType(type);
+    }
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromAttribute(Class, String, Class)}
+     */
+    public SingleValueConverter getConverterFromAttribute(String name) {
+        return wrapped.getConverterFromAttribute(name);
+    }
+
     public Converter getLocalConverter(Class definedIn, String fieldName) {
         return wrapped.getLocalConverter(definedIn, fieldName);
     }
@@ -84,6 +105,20 @@ public abstract class MapperWrapper implements Mapper {
     
     public SingleValueConverter getConverterFromItemType(String fieldName, Class type, Class definedIn) {
     	return wrapped.getConverterFromItemType(fieldName, type, definedIn);
+    }
+    
+    /**
+     * @deprecated As of 1.3, use combination of {@link #serializedMember(Class, String)} and {@link #getConverterFromItemType(String, Class, Class)} 
+     */
+    public String aliasForAttribute(Class definedIn, String fieldName) {
+    	return wrapped.aliasForAttribute(definedIn, fieldName);
+    }
+    
+    /**
+     * @deprecated As of 1.3, use combination of {@link #realMember(Class, String)} and {@link #getConverterFromItemType(String, Class, Class)} 
+     */
+    public String attributeForAlias(Class definedIn, String alias) {
+    	return wrapped.attributeForAlias(definedIn, alias);
     }
     
     /**

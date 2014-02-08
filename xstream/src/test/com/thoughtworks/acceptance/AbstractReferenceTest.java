@@ -31,7 +31,7 @@ public abstract class AbstractReferenceTest extends AbstractAcceptanceTest {
         super.setUp();
         xstream.alias("person", Person.class);
         xstream.alias("thing", Thing.class);
-        xstream.allowTypesByWildcard(AbstractReferenceTest.class.getName()+"$*");
+        xstream.allowTypesByWildcard(new String[]{AbstractReferenceTest.class.getName()+"$*"});
     }
 
     public void testReferencesAreWorking() {

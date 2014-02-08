@@ -10,6 +10,7 @@
  */
 package com.thoughtworks.acceptance;
 
+import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.testutil.TimeZoneChanger;
 
 import javax.security.auth.Subject;
@@ -97,7 +98,7 @@ public class Extended14TypesTest extends AbstractAcceptanceTest {
     }
     
     public void testSubject() {
-        xstream.allowTypes(Subject.class);
+        xstream.allowTypes(new Class[]{Subject.class});
         xstream.allowTypeHierarchy(Principal.class);
         
         Subject subject = new Subject();

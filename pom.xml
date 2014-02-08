@@ -20,7 +20,7 @@
   <groupId>com.thoughtworks.xstream</groupId>
   <artifactId>xstream-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.4.7</version>
   <name>XStream Parent</name>
   <description>
     XStream is a serialization library from Java objects to XML and back.
@@ -107,12 +107,12 @@
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
         <classifier>tests</classifier>
         <type>test-jar</type>
         <scope>test</scope>
@@ -120,31 +120,31 @@
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
         <classifier>javadoc</classifier>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-hibernate</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-hibernate</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
         <classifier>javadoc</classifier>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-benchmark</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-benchmark</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.7</version>
         <classifier>javadoc</classifier>
         <scope>provided</scope>
       </dependency>
@@ -426,6 +426,7 @@
           <artifactId>maven-eclipse-plugin</artifactId>
           <configuration>
             <downloadSources>true</downloadSources>
+            <projectNameTemplate>[artifactId]-1.4.x</projectNameTemplate>
           </configuration>
         </plugin>
         <plugin>
@@ -654,9 +655,9 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/xstream/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/xstream/trunk</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/xstream/trunk</url>
+    <connection>scm:svn:http://svn.codehaus.org/xstream/tags/XSTREAM_1_4_7</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/xstream/tags/XSTREAM_1_4_7</developerConnection>
+    <url>http://fisheye.codehaus.org/browse/xstream/tags/XSTREAM_1_4_7</url>
   </scm>
   
   <properties>

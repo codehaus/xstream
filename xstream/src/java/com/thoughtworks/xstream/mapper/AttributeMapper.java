@@ -42,12 +42,26 @@ public class AttributeMapper extends MapperWrapper {
     private ReflectionProvider reflectionProvider;
     private final Set fieldToUseAsAttribute = new HashSet();
 
+    /**
+     * @deprecated As of 1.3
+     */
+    public AttributeMapper(Mapper wrapped) {
+        this(wrapped, null, null);
+    }
+
     public AttributeMapper(Mapper wrapped, ConverterLookup converterLookup, ReflectionProvider refProvider) {
         super(wrapped);
         this.converterLookup = converterLookup;
         this.reflectionProvider = refProvider;
     }
     
+    /**
+     * @deprecated As of 1.3
+     */
+    public void setConverterLookup(ConverterLookup converterLookup) {
+        this.converterLookup = converterLookup;
+    }
+
     public void addAttributeFor(final String fieldName, final Class type) {
         fieldNameToTypeMap.put(fieldName, type);
     }
@@ -60,6 +74,17 @@ public class AttributeMapper extends MapperWrapper {
         Converter converter = converterLookup.lookupConverterForType(type);
         if (converter != null && converter instanceof SingleValueConverter) {
             return (SingleValueConverter)converter;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
+     */
+    public SingleValueConverter getConverterFromItemType(String fieldName, Class type) {
+        if (fieldNameToTypeMap.get(fieldName) == type) {
+            return getLocalConverterFromItemType(type);
         } else {
             return null;
         }
@@ -86,6 +111,29 @@ public class AttributeMapper extends MapperWrapper {
             return fieldToUseAsAttribute.contains(field);
         }
         return false;
+    }
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
+     */
+    public SingleValueConverter getConverterFromItemType(Class type) {
+        if (typeSet.contains(type)) {
+            return getLocalConverterFromItemType(type);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromAttribute(Class, String, Class)}
+     */
+    public SingleValueConverter getConverterFromAttribute(String attributeName) {
+        SingleValueConverter converter = null;
+        Class type = (Class)fieldNameToTypeMap.get(attributeName);
+        if (type != null) {
+            converter = getLocalConverterFromItemType(type);
+        }
+        return converter;
     }
 
     /**

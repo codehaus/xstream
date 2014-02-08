@@ -20,7 +20,7 @@ public class XmlFriendlyDollarOnlyTest extends XmlFriendlyTest {
     protected XStream createXStream() {
         XStream xstream = new XStream(new XppDriver(new XmlFriendlyNameCoder("_-", "_")));
         setupSecurity(xstream);
-        xstream.allowTypesByWildcard(getClass().getSuperclass().getName()+"$*");
+        xstream.allowTypesByWildcard(new String[]{getClass().getSuperclass().getName()+"$*"});
         return xstream;
     }
 

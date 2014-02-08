@@ -11,9 +11,23 @@
  */
 package com.thoughtworks.acceptance;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.text.DecimalFormatSymbols;
+import java.util.BitSet;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.regex.Pattern;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -31,6 +45,11 @@ import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.binary.BinaryStreamWriter;
 import com.thoughtworks.xstream.io.binary.BinaryStreamReader;
 import com.thoughtworks.xstream.io.xml.XppDriver;
+import com.thoughtworks.xstream.security.ArrayTypePermission;
+import com.thoughtworks.xstream.security.InterfaceTypePermission;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.NullPermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
 public abstract class AbstractAcceptanceTest extends TestCase {
 
@@ -60,8 +79,27 @@ public abstract class AbstractAcceptanceTest extends TestCase {
     }
     
     protected void setupSecurity(XStream xstream) {
-        xstream.allowTypesByWildcard(AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**");
-        xstream.allowTypesByWildcard(this.getClass().getName()+"$*");
+        xstream.addPermission(NoTypePermission.NONE); // clear out defaults
+        xstream.addPermission(NullPermission.NULL);
+        xstream.addPermission(ArrayTypePermission.ARRAYS);
+        xstream.addPermission(InterfaceTypePermission.INTERFACES);
+        xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+        xstream.allowTypeHierarchy(AccessibleObject.class);
+        xstream.allowTypeHierarchy(Calendar.class);
+        xstream.allowTypeHierarchy(Collection.class);
+        xstream.allowTypeHierarchy(Map.class);
+        xstream.allowTypeHierarchy(Map.Entry.class);
+        xstream.allowTypeHierarchy(Number.class);
+        xstream.allowTypeHierarchy(TimeZone.class);
+        xstream.allowTypeHierarchy(Throwable.class);
+        xstream.allowTypes(new Class[]{
+            BitSet.class, Charset.class, Class.class, Currency.class, Date.class, DecimalFormatSymbols.class,
+            File.class, Locale.class, Object.class, Pattern.class, StackTraceElement.class, String.class,
+            StringBuffer.class, URL.class});
+        xstream.allowTypesByWildcard(new String[]{
+            AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**",
+            this.getClass().getName()+"$*"
+        });
     }
     
     protected Object assertBothWaysNormalized(Object root, String xml, final String match,

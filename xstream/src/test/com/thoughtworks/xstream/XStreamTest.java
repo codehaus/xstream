@@ -30,6 +30,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.io.xml.AbstractDocumentReader;
 import com.thoughtworks.xstream.io.xml.Dom4JDriver;
+import com.thoughtworks.xstream.security.NoTypePermission;
 
 import junit.framework.TestCase;
 
@@ -51,8 +52,11 @@ public class XStreamTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         xstream = new XStream();
-        xstream.allowTypesByWildcard(AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**");
-        xstream.allowTypesByWildcard(this.getClass().getName()+"$*");
+        xstream.addPermission(NoTypePermission.NONE); // clear out defaults
+        xstream.allowTypesByWildcard(new String[]{
+            AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**",
+            this.getClass().getName()+"$*"
+        });
         xstream.alias("x", X.class);
         xstream.alias("y", Y.class);
         xstream.alias("funny", FunnyConstructor.class);

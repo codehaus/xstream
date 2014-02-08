@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005 Joe Walnes.
- * Copyright (C) 2006, 2007, 2008, 2010, 2011, 2013, 2014 XStream Committers.
+ * Copyright (C) 2006, 2007, 2008, 2010, 2011, 2013 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -15,7 +15,6 @@ import junit.framework.TestCase;
 
 import java.util.Comparator;
 
-import com.thoughtworks.acceptance.AbstractAcceptanceTest;
 import com.thoughtworks.acceptance.objects.StandardObject;
 import com.thoughtworks.xstream.XStream;
 
@@ -318,8 +317,6 @@ public class JavaBeanConverterTest extends TestCase {
             + "</types>";
 
         XStream xstream = new XStream();
-        xstream.allowTypesByWildcard(AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**");
-        xstream.allowTypesByWildcard(this.getClass().getName()+"$*");
         xstream.registerConverter(new JavaBeanConverter(xstream.getMapper()), XStream.PRIORITY_LOW);
         xstream.alias("types", TypesOfFields.class);
         xstream.omitField(TypesOfFields.class, "foo");
@@ -431,8 +428,6 @@ public class JavaBeanConverterTest extends TestCase {
 
     public void testFailsFastIfPropertyIsDefinedTwice() {
         XStream xstream = new XStream();
-        xstream.allowTypesByWildcard(AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**");
-        xstream.allowTypesByWildcard(this.getClass().getName()+"$*");
         xstream.registerConverter(
             new JavaBeanConverter(xstream.getMapper()), XStream.PRIORITY_LOW);
         String input = ""

@@ -24,7 +24,7 @@ public class ClassLoaderTest extends AbstractAcceptanceTest {
     public void testAllowsClassLoaderToBeOverriden() throws MalformedURLException {
         String name = "com.thoughtworks.proxy.kit.SimpleReference";
         String xml = "<com.thoughtworks.proxy.kit.SimpleReference/>";
-        xstream.allowTypes(name);
+        xstream.allowTypes(new String[]{name});
         try {
             xstream.fromXML(xml);
             fail("Thrown " + CannotResolveClassException.class.getName() + " expected");
@@ -47,11 +47,11 @@ public class ClassLoaderTest extends AbstractAcceptanceTest {
         
         xstream = createXStream();
         xstream.setClassLoader(classLoader);
-        xstream.allowTypes(name);
+        xstream.allowTypes(new String[]{name});
         assertEquals(name, xstream.fromXML(xml).getClass().getName());
         
         xstream = createXStream();
-        xstream.allowTypes(name);
+        xstream.allowTypes(new String[]{name});
         try {
             xstream.fromXML(xml);
             fail("Thrown " + CannotResolveClassException.class.getName() + " expected");

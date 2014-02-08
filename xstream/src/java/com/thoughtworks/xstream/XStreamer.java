@@ -10,6 +10,17 @@
  */
 package com.thoughtworks.xstream;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+
+import javax.xml.datatype.DatatypeFactory;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.ConverterLookup;
 import com.thoughtworks.xstream.converters.ConverterMatcher;
@@ -25,23 +36,13 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.naming.NameCoder;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.Mapper;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.thoughtworks.xstream.security.TypeHierarchyPermission;
 import com.thoughtworks.xstream.security.TypePermission;
 import com.thoughtworks.xstream.security.WildcardTypePermission;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-
-import javax.xml.datatype.DatatypeFactory;
-
 /**
- * Self-contained XStream generator. The class is a utility to write XML streams that contain 
+ * Self-contained XStream generator. The class is a utility to write XML streams that contain
  * additionally the XStream that was used to serialize the object graph. Such a stream can
  * be unmarshalled using this embedded XStream instance, that kept any settings.
  * 
@@ -49,7 +50,7 @@ import javax.xml.datatype.DatatypeFactory;
  * @since 1.2
  */
 public class XStreamer {
-    
+
     private final static TypePermission[] PERMISSIONS = {
         new TypeHierarchyPermission(ConverterMatcher.class),
         new TypeHierarchyPermission(Mapper.class),
@@ -65,7 +66,7 @@ public class XStreamer {
         new TypeHierarchyPermission(UnmarshallingContext.class),
         new TypeHierarchyPermission(NameCoder.class),
         new TypeHierarchyPermission(TypePermission.class),
-        new WildcardTypePermission(JVM.class.getPackage().getName()+".**"),
+        new WildcardTypePermission(new String[]{JVM.class.getPackage().getName()+".**"}),
         new TypeHierarchyPermission(DatatypeFactory.class) // required by DurationConverter
     };
 
@@ -77,13 +78,13 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public String toXML(XStream xstream, Object obj) throws ObjectStreamException {
-        Writer writer = new StringWriter();
+    public String toXML(final XStream xstream, final Object obj) throws ObjectStreamException {
+        final Writer writer = new StringWriter();
         try {
             toXML(xstream, obj, writer);
-        } catch (ObjectStreamException e) {
+        } catch (final ObjectStreamException e) {
             throw e;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConversionException("Unexpected IO error from a StringWriter", e);
         }
         return writer.toString();
@@ -104,10 +105,10 @@ public class XStreamer {
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be serialized
      * @since 1.2
      */
-    public void toXML(XStream xstream, Object obj, Writer out)
+    public void toXML(final XStream xstream, final Object obj, final Writer out)
             throws IOException {
-        XStream outer = new XStream();
-        ObjectOutputStream oos = outer.createObjectOutputStream(out);
+        final XStream outer = new XStream();
+        final ObjectOutputStream oos = outer.createObjectOutputStream(out);
         try {
             oos.writeObject(xstream);
             oos.flush();
@@ -128,12 +129,12 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public Object fromXML(String xml) throws ClassNotFoundException, ObjectStreamException {
+    public Object fromXML(final String xml) throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(new StringReader(xml));
-        } catch (ObjectStreamException e) {
+        } catch (final ObjectStreamException e) {
             throw e;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConversionException("Unexpected IO error from a StringReader", e);
         }
     }
@@ -143,19 +144,19 @@ public class XStreamer {
      * internally an XppDriver to load the contained XStream instance.
      * 
      * @param xml the XML data
-     * @param permissions the permissions to use (ensure that they include the defaults) 
+     * @param permissions the permissions to use (ensure that they include the defaults)
      * @throws ClassNotFoundException if a class in the XML stream cannot be found
      * @throws ObjectStreamException if the XML contains non-deserializable elements
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.4.7
      * @see #toXML(XStream, Object, Writer)
      */
-    public Object fromXML(String xml, TypePermission... permissions) throws ClassNotFoundException, ObjectStreamException {
+    public Object fromXML(final String xml, final TypePermission[] permissions) throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(new StringReader(xml), permissions);
-        } catch (ObjectStreamException e) {
+        } catch (final ObjectStreamException e) {
             throw e;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConversionException("Unexpected IO error from a StringReader", e);
         }
     }
@@ -171,13 +172,13 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public Object fromXML(HierarchicalStreamDriver driver, String xml)
+    public Object fromXML(final HierarchicalStreamDriver driver, final String xml)
             throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(driver, new StringReader(xml));
-        } catch (ObjectStreamException e) {
+        } catch (final ObjectStreamException e) {
             throw e;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConversionException("Unexpected IO error from a StringReader", e);
         }
     }
@@ -187,20 +188,20 @@ public class XStreamer {
      * 
      * @param driver the implementation to use
      * @param xml the XML data
-     * @param permissions the permissions to use (ensure that they include the defaults) 
+     * @param permissions the permissions to use (ensure that they include the defaults)
      * @throws ClassNotFoundException if a class in the XML stream cannot be found
      * @throws ObjectStreamException if the XML contains non-deserializable elements
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.4.7
      * @see #toXML(XStream, Object, Writer)
      */
-    public Object fromXML(HierarchicalStreamDriver driver, String xml, TypePermission... permissions)
+    public Object fromXML(final HierarchicalStreamDriver driver, final String xml, final TypePermission[] permissions)
             throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(driver, new StringReader(xml), permissions);
-        } catch (ObjectStreamException e) {
+        } catch (final ObjectStreamException e) {
             throw e;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConversionException("Unexpected IO error from a StringReader", e);
         }
     }
@@ -216,7 +217,7 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public Object fromXML(Reader xml)
+    public Object fromXML(final Reader xml)
             throws IOException, ClassNotFoundException {
         return fromXML(new XppDriver(), xml);
     }
@@ -226,14 +227,14 @@ public class XStreamer {
      * internally an XppDriver to load the contained XStream instance.
      * 
      * @param xml the {@link Reader} providing the XML data
-     * @param permissions the permissions to use (ensure that they include the defaults) 
+     * @param permissions the permissions to use (ensure that they include the defaults)
      * @throws IOException if an error occurs reading from the Reader.
      * @throws ClassNotFoundException if a class in the XML stream cannot be found
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.4.7
      * @see #toXML(XStream, Object, Writer)
      */
-    public Object fromXML(Reader xml, TypePermission... permissions)
+    public Object fromXML(final Reader xml, final TypePermission[] permissions)
             throws IOException, ClassNotFoundException {
         return fromXML(new XppDriver(), xml, permissions);
     }
@@ -248,9 +249,9 @@ public class XStreamer {
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.2
      */
-    public Object fromXML(HierarchicalStreamDriver driver, Reader xml)
+    public Object fromXML(final HierarchicalStreamDriver driver, final Reader xml)
             throws IOException, ClassNotFoundException {
-        return fromXML(driver, xml, PERMISSIONS);
+        return fromXML(driver, xml, new TypePermission[]{AnyTypePermission.ANY});
     }
 
     /**
@@ -258,23 +259,23 @@ public class XStreamer {
      * 
      * @param driver the implementation to use
      * @param xml the {@link Reader} providing the XML data
-     * @param permissions the permissions to use (ensure that they include the defaults) 
+     * @param permissions the permissions to use (ensure that they include the defaults)
      * @throws IOException if an error occurs reading from the Reader.
      * @throws ClassNotFoundException if a class in the XML stream cannot be found
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.4.7
      */
-    public Object fromXML(HierarchicalStreamDriver driver, Reader xml, TypePermission... permissions)
+    public Object fromXML(final HierarchicalStreamDriver driver, final Reader xml, final TypePermission[] permissions)
             throws IOException, ClassNotFoundException {
-        XStream outer = new XStream(driver);
-        for(TypePermission permission : permissions) {
-            outer.addPermission(permission);
+        final XStream outer = new XStream(driver);
+        for(int i = 0; i < permissions.length; ++i) {
+            outer.addPermission(permissions[i]);
         }
-        HierarchicalStreamReader reader = driver.createReader(xml);
-        ObjectInputStream configIn = outer.createObjectInputStream(reader);
+        final HierarchicalStreamReader reader = driver.createReader(xml);
+        final ObjectInputStream configIn = outer.createObjectInputStream(reader);
         try {
-            XStream configured = (XStream)configIn.readObject();
-            ObjectInputStream in = configured.createObjectInputStream(reader);
+            final XStream configured = (XStream)configIn.readObject();
+            final ObjectInputStream in = configured.createObjectInputStream(reader);
             try {
                 return in.readObject();
             } finally {
@@ -295,6 +296,6 @@ public class XStreamer {
      * @since 1.4.7
      */
     public static TypePermission[] getDefaultPermissions() {
-        return PERMISSIONS.clone();
+        return (TypePermission[])PERMISSIONS.clone();
     }
 }

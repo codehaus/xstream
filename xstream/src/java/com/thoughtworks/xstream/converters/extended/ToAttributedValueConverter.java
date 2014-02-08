@@ -141,7 +141,7 @@ public class ToAttributedValueConverter implements Converter {
                     throw exception;
                 }
 
-                ConverterMatcher converter = Enum.class.isAssignableFrom(type)
+                ConverterMatcher converter = UseAttributeForEnumMapper.isEnum(type)
                     ? (ConverterMatcher)enumMapper.getConverterFromItemType(null, type, null)
                     : (ConverterMatcher)mapper.getLocalConverter(definedIn, fieldName);
                 if (converter == null) {
@@ -227,7 +227,7 @@ public class ToAttributedValueConverter implements Converter {
 
                 Class type = field.getType();
                 final Class declaringClass = field.getDeclaringClass();
-                ConverterMatcher converter = Enum.class.isAssignableFrom(type)
+                ConverterMatcher converter = UseAttributeForEnumMapper.isEnum(type)
                     ? (ConverterMatcher)enumMapper.getConverterFromItemType(null, type, null)
                     : (ConverterMatcher)mapper.getLocalConverter(declaringClass, fieldName);
                 if (converter == null) {

@@ -25,7 +25,6 @@ public class DynamicProxyTest extends AbstractAcceptanceTest {
         SampleDynamicProxy.InterfaceTwo two;
     };
 
-    @Override
     protected void setupSecurity(XStream xstream) {
         super.setupSecurity(xstream);
         xstream.addPermission(ProxyTypePermission.PROXIES);

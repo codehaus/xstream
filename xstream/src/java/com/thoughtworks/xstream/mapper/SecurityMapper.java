@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.security.TypePermission;
  */
 public class SecurityMapper extends MapperWrapper {
 
-    private final List<TypePermission> permissions;
+    private final List permissions;
 
     /**
      * Construct a SecurityMapper.
@@ -44,11 +44,11 @@ public class SecurityMapper extends MapperWrapper {
      * @param permissions the predefined permissions
      * @since 1.4.7
      */
-    public SecurityMapper(final Mapper wrapped, final TypePermission... permissions) {
+    public SecurityMapper(final Mapper wrapped, final TypePermission[] permissions) {
         super(wrapped);
         this.permissions = permissions == null //
-            ? new ArrayList<TypePermission>()
-            : new ArrayList<TypePermission>(Arrays.asList(permissions));
+            ? new ArrayList()
+            : new ArrayList(Arrays.asList(permissions));
     }
 
     /**
@@ -67,12 +67,13 @@ public class SecurityMapper extends MapperWrapper {
         permissions.add(0, permission);
     }
 
-    @Override
     public Class realClass(final String elementName) {
         final Class type = super.realClass(elementName);
-        for (final TypePermission permission : permissions)
+        for (int i = 0; i < permissions.size(); ++i) {
+            final TypePermission permission = (TypePermission)permissions.get(i);
             if (permission.allows(type))
                 return type;
+        }
         throw new ForbiddenClassException(type);
     }
 }

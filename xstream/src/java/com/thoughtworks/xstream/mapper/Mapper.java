@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005, 2006 Joe Walnes.
- * Copyright (C) 2006, 2007, 2008, 2009, 2011, 2103 XStream Committers.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2011 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -102,6 +102,21 @@ public interface Mapper {
         String getKeyFieldName();
     }
 
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
+     */
+    SingleValueConverter getConverterFromItemType(String fieldName, Class type);
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
+     */
+    SingleValueConverter getConverterFromItemType(Class type);
+
+    /**
+     * @deprecated As of 1.3, use {@link #getConverterFromAttribute(Class, String, Class)}
+     */
+    SingleValueConverter getConverterFromAttribute(String name);
+
     Converter getLocalConverter(Class definedIn, String fieldName);
 
     Mapper lookupMapperOfType(Class type);
@@ -117,6 +132,28 @@ public interface Mapper {
      * @since 1.2.2
      */
     SingleValueConverter getConverterFromItemType(String fieldName, Class type, Class definedIn);
+
+    /**
+     * Returns an alias for a single field defined in an specific type.
+     * 
+     * @param definedIn the type where the field was defined
+     * @param fieldName the field name
+     * @return the alias for this field or its own name if no alias was defined
+     * @since 1.2.2
+     * @deprecated As of 1.3, use combination of {@link #serializedMember(Class, String)} and {@link #getConverterFromItemType(String, Class, Class)} 
+     */
+    String aliasForAttribute(Class definedIn, String fieldName);
+
+    /**
+     * Returns the field name for an aliased attribute.
+     * 
+     * @param definedIn the type where the field was defined
+     * @param alias the alias
+     * @return the original attribute name
+     * @since 1.2.2
+     * @deprecated As of 1.3, use combination of {@link #realMember(Class, String)} and {@link #getConverterFromItemType(String, Class, Class)} 
+     */
+    String attributeForAlias(Class definedIn, String alias);
 
     /**
      * Returns which converter to use for an specific attribute in a type.

@@ -22,9 +22,22 @@ class UseAttributeForEnumMapper extends AttributeMapper {
         super(wrapped, null, null);
     }
 
+    /**
+     * @deprecated only used for Java 1.4 support 
+     */
+    public static boolean isEnum(Class type) {
+        while(type != null && type != Object.class) {
+            if (type.getName().equals("java.lang.Enum")) {
+                return true;
+            }
+            type = type.getSuperclass();
+        }
+        return false;
+    }
+
     public boolean shouldLookForSingleValueConverter(String fieldName, Class type,
         Class definedIn) {
-        return Enum.class.isAssignableFrom(type);
+        return isEnum(type);
     }
 
     public SingleValueConverter getConverterFromItemType(String fieldName, Class type,
