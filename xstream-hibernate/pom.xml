@@ -13,7 +13,7 @@
   <parent>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.4.8</version>
   </parent>
   <artifactId>xstream-hibernate</artifactId>
   <packaging>jar</packaging>
@@ -54,6 +54,34 @@
         </plugins>
       </reporting>
     </profile>
+    <profile>
+      <id>jdk16-ge</id>
+      <activation>
+        <jdk>[1.6,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+              <archive combine.children="append">
+                <manifestFile>${project.build.directory}/OSGi/MANIFEST.MF</manifestFile>
+              </archive>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <configuration>
+              <instructions combine.children="append">
+                <Export-Package>!com.thoughtworks.xstream.hibernate.util,com.thoughtworks.xstream.hibernate.*;-noimport:=true</Export-Package>
+              </instructions>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <build>
@@ -64,25 +92,7 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive combine.children="append">
-            <manifestFile>${project.build.directory}/OSGi/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions combine.children="append">
-            <Export-Package>!com.thoughtworks.xstream.hibernate.util,com.thoughtworks.xstream.hibernate.*;-noimport:=true</Export-Package>
-          </instructions>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -101,10 +111,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005 Joe Walnes.
- * Copyright (C) 2006, 2007, 2009, 2014 XStream Committers.
+ * Copyright (C) 2006, 2007, 2009 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -13,24 +13,23 @@ package com.thoughtworks.xstream.mapper;
 
 /**
  * Mapper that uses a more meaningful alias for the field in an inner class (this$0) that refers to the outer class.
- * 
+ *
  * @author Joe Walnes
  */
 public class OuterClassMapper extends MapperWrapper {
 
     private final String alias;
 
-    public OuterClassMapper(final Mapper wrapped) {
+    public OuterClassMapper(Mapper wrapped) {
         this(wrapped, "outer-class");
     }
 
-    public OuterClassMapper(final Mapper wrapped, final String alias) {
+    public OuterClassMapper(Mapper wrapped, String alias) {
         super(wrapped);
         this.alias = alias;
     }
 
-    @Override
-    public String serializedMember(final Class<?> type, final String memberName) {
+    public String serializedMember(Class type, String memberName) {
         if (memberName.equals("this$0")) {
             return alias;
         } else {
@@ -38,8 +37,7 @@ public class OuterClassMapper extends MapperWrapper {
         }
     }
 
-    @Override
-    public String realMember(final Class<?> type, final String serialized) {
+    public String realMember(Class type, String serialized) {
         if (serialized.equals(alias)) {
             return "this$0";
         } else {

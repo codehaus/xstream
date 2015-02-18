@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013, 2014 XStream Committers.
+ * Copyright (C) 2013 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -10,21 +10,23 @@
  */
 package com.thoughtworks.xstream.io.xml;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-
 import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.io.naming.NameCoder;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+
 
 /**
- * A driver using the standard JDK StAX implementation provided by the Java runtime.
+ * A driver using the standard JDK StAX implementation provided by the Java runtime (since Java
+ * 6).
  * <p>
- * In contrast to XMLInputFactory.newFactory() or XMLOutputFactory.newFactory() this implementation will ignore any
- * implementations provided with the system properties <em>javax.xml.stream.XMLInputFactory</em> and
- * <em>javax.xml.stream.XMLOutputFactory</em>, all implementations configured in <em>lib/stax.properties</em> or
- * registered with the Service API.
+ * In contrast to XMLInputFactory.newFactory() or XMLOutputFactory.newFactory() this
+ * implementation will ignore any implementations provided with the system properties
+ * <em>javax.xml.stream.XMLInputFactory</em> and <em>javax.xml.stream.XMLOutputFactory</em>, all
+ * implementations configured in <em>lib/stax.properties</em> or registered with the Service
+ * API.
  * </p>
  * 
  * @author J&ouml;rg Schaible
@@ -39,72 +41,68 @@ public class StandardStaxDriver extends StaxDriver {
     /**
      * @deprecated As of 1.4.6 use {@link #StandardStaxDriver(QNameMap, NameCoder)}
      */
-    @Deprecated
-    public StandardStaxDriver(final QNameMap qnameMap, final XmlFriendlyNameCoder nameCoder) {
+    public StandardStaxDriver(QNameMap qnameMap, XmlFriendlyNameCoder nameCoder) {
         super(qnameMap, nameCoder);
     }
 
     /**
      * @since 1.4.6
      */
-    public StandardStaxDriver(final QNameMap qnameMap, final NameCoder nameCoder) {
+    public StandardStaxDriver(QNameMap qnameMap, NameCoder nameCoder) {
         super(qnameMap, nameCoder);
     }
 
-    public StandardStaxDriver(final QNameMap qnameMap) {
+    public StandardStaxDriver(QNameMap qnameMap) {
         super(qnameMap);
     }
 
     /**
      * @deprecated As of 1.4.6 use {@link #StandardStaxDriver(NameCoder)}
      */
-    @Deprecated
-    public StandardStaxDriver(final XmlFriendlyNameCoder nameCoder) {
+    public StandardStaxDriver(XmlFriendlyNameCoder nameCoder) {
         super(nameCoder);
     }
 
     /**
      * @since 1.4.6
      */
-    public StandardStaxDriver(final NameCoder nameCoder) {
+    public StandardStaxDriver(NameCoder nameCoder) {
         super(nameCoder);
     }
 
-    @Override
     protected XMLInputFactory createInputFactory() {
         Exception exception = null;
         try {
-            final Class<? extends XMLInputFactory> staxInputFactory = JVM.getStaxInputFactory();
+            Class staxInputFactory = JVM.getStaxInputFactory();
             if (staxInputFactory != null) {
-                return staxInputFactory.newInstance();
+                return (XMLInputFactory)staxInputFactory.newInstance();
             } else {
                 throw new StreamException("Java runtime has no standard XMLInputFactory implementation.", exception);
             }
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             exception = e;
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             exception = e;
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             exception = e;
         }
         throw new StreamException("Cannot create standard XMLInputFactory instance of Java runtime.", exception);
     }
 
-    @Override
     protected XMLOutputFactory createOutputFactory() {
         Exception exception = null;
         try {
-            final Class<? extends XMLOutputFactory> staxOutputFactory = JVM.getStaxOutputFactory();
+            Class staxOutputFactory = JVM.getStaxOutputFactory();
             if (staxOutputFactory != null) {
-                return staxOutputFactory.newInstance();
+                return (XMLOutputFactory)staxOutputFactory.newInstance();
             } else {
                 throw new StreamException("Java runtime has no standard XMLOutputFactory implementation.", exception);
             }
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             exception = e;
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             exception = e;
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             exception = e;
         }
         throw new StreamException("Cannot create standard XMLOutputFactory instance of Java runtime.", exception);

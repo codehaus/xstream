@@ -36,15 +36,15 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.naming.NameCoder;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.Mapper;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 import com.thoughtworks.xstream.security.TypeHierarchyPermission;
 import com.thoughtworks.xstream.security.TypePermission;
 import com.thoughtworks.xstream.security.WildcardTypePermission;
 
-
 /**
- * Self-contained XStream generator. The class is a utility to write XML streams that contain additionally the XStream
- * that was used to serialize the object graph. Such a stream can be unmarshalled using this embedded XStream instance,
- * that kept any settings.
+ * Self-contained XStream generator. The class is a utility to write XML streams that contain
+ * additionally the XStream that was used to serialize the object graph. Such a stream can
+ * be unmarshalled using this embedded XStream instance, that kept any settings.
  * 
  * @author J&ouml;rg Schaible
  * @since 1.2
@@ -52,15 +52,21 @@ import com.thoughtworks.xstream.security.WildcardTypePermission;
 public class XStreamer {
 
     private final static TypePermission[] PERMISSIONS = {
-        new TypeHierarchyPermission(ConverterMatcher.class), new TypeHierarchyPermission(Mapper.class),
-        new TypeHierarchyPermission(XStream.class), new TypeHierarchyPermission(ReflectionProvider.class),
-        new TypeHierarchyPermission(JavaBeanProvider.class), new TypeHierarchyPermission(FieldKeySorter.class),
-        new TypeHierarchyPermission(ConverterLookup.class), new TypeHierarchyPermission(ConverterRegistry.class),
+        new TypeHierarchyPermission(ConverterMatcher.class),
+        new TypeHierarchyPermission(Mapper.class),
+        new TypeHierarchyPermission(XStream.class),
+        new TypeHierarchyPermission(ReflectionProvider.class),
+        new TypeHierarchyPermission(JavaBeanProvider.class),
+        new TypeHierarchyPermission(FieldKeySorter.class),
+        new TypeHierarchyPermission(ConverterLookup.class),
+        new TypeHierarchyPermission(ConverterRegistry.class),
         new TypeHierarchyPermission(HierarchicalStreamDriver.class),
-        new TypeHierarchyPermission(MarshallingStrategy.class), new TypeHierarchyPermission(MarshallingContext.class),
-        new TypeHierarchyPermission(UnmarshallingContext.class), new TypeHierarchyPermission(NameCoder.class),
+        new TypeHierarchyPermission(MarshallingStrategy.class),
+        new TypeHierarchyPermission(MarshallingContext.class),
+        new TypeHierarchyPermission(UnmarshallingContext.class),
+        new TypeHierarchyPermission(NameCoder.class),
         new TypeHierarchyPermission(TypePermission.class),
-        new WildcardTypePermission(JVM.class.getPackage().getName() + ".**"),
+        new WildcardTypePermission(new String[]{JVM.class.getPackage().getName()+".**"}),
         new TypeHierarchyPermission(DatatypeFactory.class) // required by DurationConverter
     };
 
@@ -87,18 +93,20 @@ public class XStreamer {
     /**
      * Serialize an object including the XStream to the given Writer as pretty-printed XML.
      * <p>
-     * Warning: XStream will serialize itself into this XML stream. To read such an XML code, you should use
-     * {@link XStreamer#fromXML(Reader)} or one of the other overloaded methods. Since a lot of internals are written
-     * into the stream, you cannot expect to use such an XML to work with another XStream version or with XStream
-     * running on different JDKs and/or versions. We have currently no JDK 1.3 support, nor will the
-     * PureReflectionConverter work with a JDK less than 1.5.
+     * Warning: XStream will serialize itself into this XML stream. To read such an XML code, you
+     * should use {@link XStreamer#fromXML(Reader)} or one of the other overloaded
+     * methods. Since a lot of internals are written into the stream, you cannot expect to use such
+     * an XML to work with another XStream version or with XStream running on different JDKs and/or
+     * versions. We have currently no JDK 1.3 support, nor will the PureReflectionConverter work
+     * with a JDK less than 1.5.
      * </p>
      * 
      * @throws IOException if an error occurs reading from the Writer.
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be serialized
      * @since 1.2
      */
-    public void toXML(final XStream xstream, final Object obj, final Writer out) throws IOException {
+    public void toXML(final XStream xstream, final Object obj, final Writer out)
+            throws IOException {
         final XStream outer = new XStream();
         final ObjectOutputStream oos = outer.createObjectOutputStream(out);
         try {
@@ -111,8 +119,8 @@ public class XStreamer {
     }
 
     /**
-     * Deserialize a self-contained XStream with object from a String. The method will use internally an XppDriver to
-     * load the contained XStream instance with default permissions.
+     * Deserialize a self-contained XStream with object from a String. The method will use
+     * internally an XppDriver to load the contained XStream instance with default permissions.
      * 
      * @param xml the XML data
      * @throws ClassNotFoundException if a class in the XML stream cannot be found
@@ -121,7 +129,7 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public <T> T fromXML(final String xml) throws ClassNotFoundException, ObjectStreamException {
+    public Object fromXML(final String xml) throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(new StringReader(xml));
         } catch (final ObjectStreamException e) {
@@ -132,8 +140,8 @@ public class XStreamer {
     }
 
     /**
-     * Deserialize a self-contained XStream with object from a String. The method will use internally an XppDriver to
-     * load the contained XStream instance.
+     * Deserialize a self-contained XStream with object from a String. The method will use
+     * internally an XppDriver to load the contained XStream instance.
      * 
      * @param xml the XML data
      * @param permissions the permissions to use (ensure that they include the defaults)
@@ -143,8 +151,7 @@ public class XStreamer {
      * @since 1.4.7
      * @see #toXML(XStream, Object, Writer)
      */
-    public <T> T fromXML(final String xml, final TypePermission... permissions)
-            throws ClassNotFoundException, ObjectStreamException {
+    public Object fromXML(final String xml, final TypePermission[] permissions) throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(new StringReader(xml), permissions);
         } catch (final ObjectStreamException e) {
@@ -165,7 +172,7 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public <T> T fromXML(final HierarchicalStreamDriver driver, final String xml)
+    public Object fromXML(final HierarchicalStreamDriver driver, final String xml)
             throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(driver, new StringReader(xml));
@@ -188,7 +195,7 @@ public class XStreamer {
      * @since 1.4.7
      * @see #toXML(XStream, Object, Writer)
      */
-    public <T> T fromXML(final HierarchicalStreamDriver driver, final String xml, final TypePermission... permissions)
+    public Object fromXML(final HierarchicalStreamDriver driver, final String xml, final TypePermission[] permissions)
             throws ClassNotFoundException, ObjectStreamException {
         try {
             return fromXML(driver, new StringReader(xml), permissions);
@@ -200,8 +207,8 @@ public class XStreamer {
     }
 
     /**
-     * Deserialize a self-contained XStream with object from an XML Reader. The method will use internally an XppDriver
-     * to load the contained XStream instance with default permissions.
+     * Deserialize a self-contained XStream with object from an XML Reader. The method will use
+     * internally an XppDriver to load the contained XStream instance with default permissions.
      * 
      * @param xml the {@link Reader} providing the XML data
      * @throws IOException if an error occurs reading from the Reader.
@@ -210,13 +217,14 @@ public class XStreamer {
      * @since 1.2
      * @see #toXML(XStream, Object, Writer)
      */
-    public <T> T fromXML(final Reader xml) throws IOException, ClassNotFoundException {
+    public Object fromXML(final Reader xml)
+            throws IOException, ClassNotFoundException {
         return fromXML(new XppDriver(), xml);
     }
 
     /**
-     * Deserialize a self-contained XStream with object from an XML Reader. The method will use internally an XppDriver
-     * to load the contained XStream instance.
+     * Deserialize a self-contained XStream with object from an XML Reader. The method will use
+     * internally an XppDriver to load the contained XStream instance.
      * 
      * @param xml the {@link Reader} providing the XML data
      * @param permissions the permissions to use (ensure that they include the defaults)
@@ -226,14 +234,14 @@ public class XStreamer {
      * @since 1.4.7
      * @see #toXML(XStream, Object, Writer)
      */
-    public <T> T fromXML(final Reader xml, final TypePermission... permissions)
+    public Object fromXML(final Reader xml, final TypePermission[] permissions)
             throws IOException, ClassNotFoundException {
         return fromXML(new XppDriver(), xml, permissions);
     }
 
     /**
      * Deserialize a self-contained XStream with object from an XML Reader.
-     * 
+     *
      * @param driver the implementation to use
      * @param xml the {@link Reader} providing the XML data
      * @throws IOException if an error occurs reading from the Reader.
@@ -241,9 +249,9 @@ public class XStreamer {
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.2
      */
-    public <T> T fromXML(final HierarchicalStreamDriver driver, final Reader xml)
+    public Object fromXML(final HierarchicalStreamDriver driver, final Reader xml)
             throws IOException, ClassNotFoundException {
-        return fromXML(driver, xml, PERMISSIONS);
+        return fromXML(driver, xml, new TypePermission[]{AnyTypePermission.ANY});
     }
 
     /**
@@ -257,11 +265,11 @@ public class XStreamer {
      * @throws com.thoughtworks.xstream.XStreamException if the object cannot be deserialized
      * @since 1.4.7
      */
-    public <T> T fromXML(final HierarchicalStreamDriver driver, final Reader xml, final TypePermission... permissions)
+    public Object fromXML(final HierarchicalStreamDriver driver, final Reader xml, final TypePermission[] permissions)
             throws IOException, ClassNotFoundException {
         final XStream outer = new XStream(driver);
-        for (final TypePermission permission : permissions) {
-            outer.addPermission(permission);
+        for(int i = 0; i < permissions.length; ++i) {
+            outer.addPermission(permissions[i]);
         }
         final HierarchicalStreamReader reader = driver.createReader(xml);
         final ObjectInputStream configIn = outer.createObjectInputStream(reader);
@@ -269,9 +277,7 @@ public class XStreamer {
             final XStream configured = (XStream)configIn.readObject();
             final ObjectInputStream in = configured.createObjectInputStream(reader);
             try {
-                @SuppressWarnings("unchecked")
-                final T t = (T)in.readObject();
-                return t;
+                return in.readObject();
             } finally {
                 in.close();
             }
@@ -290,6 +296,6 @@ public class XStreamer {
      * @since 1.4.7
      */
     public static TypePermission[] getDefaultPermissions() {
-        return PERMISSIONS.clone();
+        return (TypePermission[])PERMISSIONS.clone();
     }
 }

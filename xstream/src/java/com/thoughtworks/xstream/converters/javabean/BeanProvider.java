@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005 Joe Walnes.
- * Copyright (C) 2006, 2007, 2008, 2010, 2011, 2013, 2014 XStream Committers.
+ * Copyright (C) 2006, 2007, 2008, 2010, 2011, 2013 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -29,7 +29,6 @@ public class BeanProvider implements JavaBeanProvider {
     /**
      * @deprecated As of 1.4.6
      */
-    @Deprecated
     protected static final Object[] NO_PARAMS = new Object[0];
     protected PropertyDictionary propertyDictionary;
 
@@ -41,11 +40,12 @@ public class BeanProvider implements JavaBeanProvider {
     }
 
     /**
-     * Construct a BeanProvider with a comparator to sort the bean properties by name in the dictionary.
+     * Construct a BeanProvider with a comparator to sort the bean properties by name in the
+     * dictionary.
      * 
      * @param propertyNameComparator the comparator
      */
-    public BeanProvider(final Comparator<String> propertyNameComparator) {
+    public BeanProvider(final Comparator propertyNameComparator) {
         this(new PropertyDictionary(new ComparingPropertySorter(propertyNameComparator)));
     }
 
@@ -59,44 +59,43 @@ public class BeanProvider implements JavaBeanProvider {
         this.propertyDictionary = propertyDictionary;
     }
 
-    @Override
-    public Object newInstance(final Class<?> type) {
+    public Object newInstance(Class type) {
         try {
             return type.newInstance();
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw new ObjectAccessException("Cannot construct " + type.getName(), e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new ObjectAccessException("Cannot construct " + type.getName(), e);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw new ObjectAccessException("Cannot construct " + type.getName(), e);
-        } catch (final ExceptionInInitializerError e) {
+        } catch (ExceptionInInitializerError e) {
             throw new ObjectAccessException("Cannot construct " + type.getName(), e);
         }
     }
 
-    @Override
-    public void visitSerializableProperties(final Object object, final JavaBeanProvider.Visitor visitor) {
-        final PropertyDescriptor[] propertyDescriptors = getSerializableProperties(object);
-        for (final PropertyDescriptor property : propertyDescriptors) {
+    public void visitSerializableProperties(Object object, JavaBeanProvider.Visitor visitor) {
+        PropertyDescriptor[] propertyDescriptors = getSerializableProperties(object);
+        for (int i = 0; i < propertyDescriptors.length; i++ ) {
+            PropertyDescriptor property = propertyDescriptors[i];
             try {
-                final Method readMethod = property.getReadMethod();
-                final String name = property.getName();
-                final Class<?> definedIn = readMethod.getDeclaringClass();
+                Method readMethod = property.getReadMethod();
+                String name = property.getName();
+                Class definedIn = readMethod.getDeclaringClass();
                 if (visitor.shouldVisit(name, definedIn)) {
-                    final Object value = readMethod.invoke(object);
+                    Object value = readMethod.invoke(object, new Object[0]);
                     visitor.visit(name, property.getPropertyType(), definedIn, value);
                 }
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw new ObjectAccessException("Could not get property "
                     + object.getClass()
                     + "."
                     + property.getName(), e);
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 throw new ObjectAccessException("Could not get property "
                     + object.getClass()
                     + "."
                     + property.getName(), e);
-            } catch (final InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw new ObjectAccessException("Could not get property "
                     + object.getClass()
                     + "."
@@ -105,38 +104,43 @@ public class BeanProvider implements JavaBeanProvider {
         }
     }
 
-    @Override
-    public void writeProperty(final Object object, final String propertyName, final Object value) {
-        final PropertyDescriptor property = getProperty(propertyName, object.getClass());
+    public void writeProperty(Object object, String propertyName, Object value) {
+        PropertyDescriptor property = getProperty(propertyName, object.getClass());
         try {
             property.getWriteMethod().invoke(object, new Object[]{value});
-        } catch (final IllegalArgumentException e) {
-            throw new ObjectAccessException("Could not set property " + object.getClass() + "." + property.getName(), e);
-        } catch (final IllegalAccessException e) {
-            throw new ObjectAccessException("Could not set property " + object.getClass() + "." + property.getName(), e);
-        } catch (final InvocationTargetException e) {
-            throw new ObjectAccessException("Could not set property " + object.getClass() + "." + property.getName(), e);
+        } catch (IllegalArgumentException e) {
+            throw new ObjectAccessException("Could not set property "
+                + object.getClass()
+                + "."
+                + property.getName(), e);
+        } catch (IllegalAccessException e) {
+            throw new ObjectAccessException("Could not set property "
+                + object.getClass()
+                + "."
+                + property.getName(), e);
+        } catch (InvocationTargetException e) {
+            throw new ObjectAccessException("Could not set property "
+                + object.getClass()
+                + "."
+                + property.getName(), e);
         }
     }
 
-    @Override
-    public Class<?> getPropertyType(final Object object, final String name) {
+    public Class getPropertyType(Object object, String name) {
         return getProperty(name, object.getClass()).getPropertyType();
     }
 
-    @Override
-    public boolean propertyDefinedInClass(final String name, final Class<?> type) {
+    public boolean propertyDefinedInClass(String name, Class type) {
         return getProperty(name, type) != null;
     }
 
     /**
      * Returns true if the Bean provider can instantiate the specified class
      */
-    @Override
-    public boolean canInstantiate(final Class<?> type) {
+    public boolean canInstantiate(Class type) {
         try {
             return newInstance(type) != null;
-        } catch (final ObjectAccessException e) {
+        } catch (ObjectAccessException e) {
             return false;
         }
     }
@@ -147,46 +151,44 @@ public class BeanProvider implements JavaBeanProvider {
      * @param type
      * @deprecated As of 1.4.6 use {@link #newInstance(Class)} or {@link #canInstantiate(Class)} directly.
      */
-    @Deprecated
-    protected Constructor<?> getDefaultConstrutor(final Class<?> type) {
-
-        final Constructor<?>[] constructors = type.getConstructors();
-        for (final Constructor<?> c : constructors) {
-            if (c.getParameterTypes().length == 0 && Modifier.isPublic(c.getModifiers())) {
+    protected Constructor getDefaultConstrutor(Class type) {
+        
+        Constructor[] constructors = type.getConstructors();
+        for (int i = 0; i < constructors.length; i++ ) {
+            Constructor c = constructors[i];
+            if (c.getParameterTypes().length == 0 && Modifier.isPublic(c.getModifiers()))
                 return c;
-            }
         }
         return null;
     }
 
-    protected PropertyDescriptor[] getSerializableProperties(final Object object) {
-        final List<PropertyDescriptor> result = new ArrayList<PropertyDescriptor>();
-        for (final Iterator<PropertyDescriptor> iter = propertyDictionary.propertiesFor(object.getClass()); iter
-            .hasNext();) {
-            final PropertyDescriptor descriptor = iter.next();
+    protected PropertyDescriptor[] getSerializableProperties(Object object) {
+        List result = new ArrayList();
+        for (final Iterator iter = propertyDictionary.propertiesFor(object.getClass()); iter.hasNext();) {
+            final PropertyDescriptor descriptor = (PropertyDescriptor)iter.next();
             if (canStreamProperty(descriptor)) {
                 result.add(descriptor);
             }
         }
-        return result.toArray(new PropertyDescriptor[result.size()]);
+        return (PropertyDescriptor[])result.toArray(new PropertyDescriptor[result.size()]);
     }
 
-    protected boolean canStreamProperty(final PropertyDescriptor descriptor) {
+    protected boolean canStreamProperty(PropertyDescriptor descriptor) {
         return descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null;
     }
 
-    public boolean propertyWriteable(final String name, final Class<?> type) {
-        final PropertyDescriptor property = getProperty(name, type);
+    public boolean propertyWriteable(String name, Class type) {
+        PropertyDescriptor property = getProperty(name, type);
         return property.getWriteMethod() != null;
     }
 
-    protected PropertyDescriptor getProperty(final String name, final Class<?> type) {
-        return propertyDictionary.propertyDescriptor(type, name);
+    protected PropertyDescriptor getProperty(String name, Class type) {
+        return (PropertyDescriptor)propertyDictionary.propertyDescriptor(type, name);
     }
 
     /**
      * @deprecated As of 1.4 use {@link JavaBeanProvider.Visitor}
      */
-    @Deprecated
-    public interface Visitor extends JavaBeanProvider.Visitor {}
+    public interface Visitor extends JavaBeanProvider.Visitor {
+    }
 }

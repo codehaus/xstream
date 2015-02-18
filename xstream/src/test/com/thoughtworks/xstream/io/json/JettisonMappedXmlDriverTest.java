@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2014 XStream Committers.
+ * Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -10,7 +10,6 @@
  */
 package com.thoughtworks.xstream.io.json;
 
-import com.thoughtworks.acceptance.AbstractAcceptanceTest;
 import com.thoughtworks.acceptance.objects.Category;
 import com.thoughtworks.acceptance.objects.OwnerOfExternalizable;
 import com.thoughtworks.acceptance.objects.Product;
@@ -34,7 +33,6 @@ import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
 
 
 /**
@@ -60,8 +58,6 @@ public class JettisonMappedXmlDriverTest extends TestCase {
         super.setUp();
         TimeZoneChanger.change("UTC");
         xstream = new XStream(new JettisonMappedXmlDriver());
-        xstream.allowTypesByWildcard(AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**");
-        xstream.allowTypesByWildcard(this.getClass().getName()+"$*");
         xstream.alias("category", Category.class);
         xstream.alias("product", Product.class);
     }
@@ -95,8 +91,6 @@ public class JettisonMappedXmlDriverTest extends TestCase {
             Configuration config = new Configuration();
             setTypeConverter.invoke(config, new Object[]{typeConverter});
             xstream = new XStream(new JettisonMappedXmlDriver(config));
-            xstream.allowTypesByWildcard(AbstractAcceptanceTest.class.getPackage().getName()+".*objects.**");
-            xstream.allowTypesByWildcard(this.getClass().getName()+"$*");
             xstream.alias("product", Product.class);
             Product product = new Product("Banana", "123", 23.00);
             String result = xstream.toXML(product);
@@ -304,32 +298,6 @@ public class JettisonMappedXmlDriverTest extends TestCase {
         SpecialCharacters sc2 = (SpecialCharacters)xstream.fromXML(json);
         assertEquals(json, xstream.toXML(sc2));
     }
-    
-    public void testProperties()
-	{
-		Properties properties = new Properties();
-		properties.setProperty("key.1", "Value 1");
-        String json = xstream.toXML(properties);
-        assertEquals("{'properties':[{'property':{'@name':'key.1','@value':'Value 1'}}]}".replace('\'', '"'), json);
-		Properties properties2 = (Properties)xstream.fromXML(json);
-		assertEquals(json, xstream.toXML(properties2));
-		
-		properties.setProperty("key.2", "Value 2");
-        json = xstream.toXML(properties);
-        assertEquals("{'properties':[{'property':[{'@name':'key.2','@value':'Value 2'},{'@name':'key.1','@value':'Value 1'}]}]}".replace('\'', '"'), json);
-		properties2 = (Properties)xstream.fromXML(json);
-		assertEquals(json, xstream.toXML(properties2));
-	}
-    
-    public void testEmptyArray()
-	{
-    	xstream.alias("exception", Exception.class);
-		Exception[] exceptions = new Exception[3];
-        String json = xstream.toXML(exceptions);
-        assertEquals("{'exception-array':[{'null':['','','']}]}".replace('\'', '"'), json);
-        Exception[] exceptions2 = (Exception[])xstream.fromXML(json);
-		assertEquals(json, xstream.toXML(exceptions2));
-	}
 
     public void todoTestCanMarshalEmbeddedExternalizable() {
         xstream.alias("owner", OwnerOfExternalizable.class);

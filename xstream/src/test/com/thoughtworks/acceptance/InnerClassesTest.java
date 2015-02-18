@@ -14,7 +14,7 @@ package com.thoughtworks.acceptance;
 public class InnerClassesTest extends AbstractAcceptanceTest {
 
     public void testSerializedInnerClassMaintainsReferenceToOuterClass() {
-        xstream.allowTypes(Outer.class, Outer.Inner.class);
+        xstream.allowTypes(new Class[]{Outer.class, Outer.Inner.class});
 
         Outer outer = new Outer("THE-OUTER-NAME", "THE-INNER-NAME");
         Outer.Inner inner = outer.getInner();

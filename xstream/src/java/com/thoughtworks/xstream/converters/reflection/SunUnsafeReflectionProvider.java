@@ -12,8 +12,8 @@
 package com.thoughtworks.xstream.converters.reflection;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 
 /**
@@ -36,7 +36,7 @@ import java.util.Map;
 public class SunUnsafeReflectionProvider extends SunLimitedUnsafeReflectionProvider {
 
     // references to the Field key are kept in the FieldDictionary
-    private transient Map<Field, Long> fieldOffsetCache;
+    private transient Map fieldOffsetCache;
 
     /**
      * @since 1.4.7
@@ -48,23 +48,22 @@ public class SunUnsafeReflectionProvider extends SunLimitedUnsafeReflectionProvi
     /**
      * @since 1.4.7
      */
-    public SunUnsafeReflectionProvider(final FieldDictionary dic) {
+    public SunUnsafeReflectionProvider(FieldDictionary dic) {
         super(dic);
     }
 
-    @Override
-    public void writeField(final Object object, final String fieldName, final Object value, final Class<?> definedIn) {
+    public void writeField(Object object, String fieldName, Object value, Class definedIn) {
         write(fieldDictionary.field(object.getClass(), fieldName, definedIn), object, value);
     }
 
-    private void write(final Field field, final Object object, final Object value) {
+    private void write(Field field, Object object, Object value) {
         if (exception != null) {
             throw new ObjectAccessException("Could not set field " + object.getClass() + "." + field.getName(),
                 exception);
         }
         try {
-            final long offset = getFieldOffset(field);
-            final Class<?> type = field.getType();
+            long offset = getFieldOffset(field);
+            Class type = field.getType();
             if (type.isPrimitive()) {
                 if (type.equals(Integer.TYPE)) {
                     unsafe.putInt(object, offset, ((Integer)value).intValue());
@@ -94,15 +93,15 @@ public class SunUnsafeReflectionProvider extends SunLimitedUnsafeReflectionProvi
                 unsafe.putObject(object, offset, value);
             }
 
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new ObjectAccessException("Could not set field " + object.getClass() + "." + field.getName(), e);
         }
     }
 
-    private synchronized long getFieldOffset(final Field f) {
-        Long l = fieldOffsetCache.get(f);
+    private synchronized long getFieldOffset(Field f) {
+        Long l = (Long)fieldOffsetCache.get(f);
         if (l == null) {
-            l = Long.valueOf(unsafe.objectFieldOffset(f));
+            l = new Long(unsafe.objectFieldOffset(f));
             fieldOffsetCache.put(f, l);
         }
 
@@ -114,9 +113,8 @@ public class SunUnsafeReflectionProvider extends SunLimitedUnsafeReflectionProvi
         return this;
     }
 
-    @Override
     protected void init() {
         super.init();
-        fieldOffsetCache = new HashMap<Field, Long>();
+        fieldOffsetCache = new WeakHashMap();
     }
 }

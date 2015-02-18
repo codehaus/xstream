@@ -20,17 +20,14 @@ public class PrimitiveTypePermission implements TypePermission {
      */
     public static final TypePermission PRIMITIVES = new PrimitiveTypePermission();
 
-    @Override
-    public boolean allows(Class<?> type) {
+    public boolean allows(Class type) {
         return type != null && type.isPrimitive() || Primitives.isBoxed(type);
     }
 
-    @Override
     public int hashCode() {
         return 7;
     }
 
-    @Override
     public boolean equals(Object obj) {
         return obj != null && obj.getClass() == PrimitiveTypePermission.class;
     }

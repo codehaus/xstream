@@ -20,7 +20,7 @@
   <groupId>com.thoughtworks.xstream</groupId>
   <artifactId>xstream-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.4.8</version>
   <name>XStream Parent</name>
   <description>
     XStream is a serialization library from Java objects to XML and back.
@@ -59,11 +59,50 @@
       </activation>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>bundle-manifest</id>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>manifest</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
       <modules>
         <!--module>xstream-builder</module-->
       </modules>
+    </profile>
+    <profile>
+      <id>jdk15</id>
+      <activation>
+        <jdk>1.5</jdk>
+      </activation>
+      <properties>
+        <version.hsqldb>1.8.0.10</version.hsqldb>
+        <version.org.hibernate.core>3.6.6.Final</version.org.hibernate.core>
+      </properties>
+    </profile>
+    <profile>
+      <!-- build with Maven 2.0.10 !!! -->
+      <id>jdk14</id>
+      <activation>
+        <jdk>1.4</jdk>
+      </activation>
+      <properties>
+        <version.java.source>1.3</version.java.source>
+        <version.java.target>1.3</version.java.target>
+        <link.javadoc.javase>http://docs.oracle.com/javase/1.4.2/docs/api/</link.javadoc.javase>
+        <!-- repeat Hibernate version dependencies, JDK intervals in activation is not supported with M2.0.x -->
+        <version.hsqldb>1.8.0.10</version.hsqldb>
+        <version.org.hibernate.core>3.3.2.GA</version.org.hibernate.core>
+        <version.org.hibernate.envers>3.6.6.Final</version.org.hibernate.envers><!-- not usable with JDK 1.4 -->
+      </properties>
     </profile>
     <profile>
       <id>java</id>
@@ -95,26 +134,13 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>bundle-manifest</id>
-                <phase>process-classes</phase>
-                <goals>
-                  <goal>manifest</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
     <profile>
       <id>xstream-release</id>
       <properties>
-        <version.java.enforced>[1.8;1.9)</version.java.enforced>
+        <version.java.enforced>[1.8,1.9)</version.java.enforced>
       </properties>
       <build>
         <plugins>
@@ -156,12 +182,12 @@
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
         <classifier>tests</classifier>
         <type>test-jar</type>
         <scope>test</scope>
@@ -169,31 +195,31 @@
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
         <classifier>javadoc</classifier>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-hibernate</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-hibernate</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
         <classifier>javadoc</classifier>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-benchmark</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream-benchmark</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.4.8</version>
         <classifier>javadoc</classifier>
         <scope>provided</scope>
       </dependency>
@@ -475,6 +501,7 @@
           <artifactId>maven-eclipse-plugin</artifactId>
           <configuration>
             <downloadSources>true</downloadSources>
+            <projectNameTemplate>[artifactId]-1.4.x</projectNameTemplate>
           </configuration>
         </plugin>
         <plugin>
@@ -725,22 +752,22 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/xstream/trunk</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/xstream/trunk</developerConnection>
-    <url>http://fisheye.codehaus.org/browse/xstream/trunk</url>
+    <connection>scm:svn:http://svn.codehaus.org/xstream/tags/XSTREAM_1_4_8</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/xstream/tags/XSTREAM_1_4_8</developerConnection>
+    <url>http://fisheye.codehaus.org/browse/xstream/tags/XSTREAM_1_4_8</url>
   </scm>
   
   <properties>
     <version.java.source>1.5</version.java.source>
     <version.java.target>1.5</version.java.target>
-    <version.java.enforced>[1.6,)</version.java.enforced>
+    <version.java.enforced>[1.4,)</version.java.enforced>
 
     <version.plugin.codehaus.xsite>1.2.1</version.plugin.codehaus.xsite>
     <version.plugin.felix.bundle>2.3.7</version.plugin.felix.bundle>
     <version.plugin.maven.antrun>1.1</version.plugin.maven.antrun>
     <version.plugin.maven.assembly>2.1</version.plugin.maven.assembly>
     <version.plugin.maven.clean>2.2</version.plugin.maven.clean>
-    <version.plugin.maven.compiler>3.1</version.plugin.maven.compiler>
+    <version.plugin.maven.compiler>2.1</version.plugin.maven.compiler><!-- JDK 1.4 compatible -->
     <version.plugin.maven.dependency>2.1</version.plugin.maven.dependency>
     <version.plugin.maven.deploy>2.3</version.plugin.maven.deploy>
     <version.plugin.maven.enforcer>1.4</version.plugin.maven.enforcer>
@@ -790,6 +817,6 @@
 
     <link.javadoc.javase>http://docs.oracle.com/javase/8/docs/api/</link.javadoc.javase>
 
-    <javadoc.xdoclint/>
+    <javadoc.xdoclint />
   </properties>
 </project>

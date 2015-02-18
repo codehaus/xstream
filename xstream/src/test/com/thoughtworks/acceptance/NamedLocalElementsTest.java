@@ -514,7 +514,7 @@ public class NamedLocalElementsTest extends AbstractAcceptanceTest {
         
         Arrays arrays = new Arrays();
         arrays.objects = new Object[] {
-            "joe", Boolean.TRUE, Integer.valueOf(47) 
+            "joe", Boolean.TRUE, new Integer(47) 
         };
         
         String expected = (""

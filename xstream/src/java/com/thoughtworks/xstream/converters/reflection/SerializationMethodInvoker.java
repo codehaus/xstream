@@ -17,15 +17,14 @@ import java.io.ObjectOutputStream;
 import com.thoughtworks.xstream.core.Caching;
 import com.thoughtworks.xstream.core.util.SerializationMembers;
 
-
 /**
- * Convenience wrapper to invoke special serialization methods on objects (and perform reflection caching).
+ * Convenience wrapper to invoke special serialization methods on objects (and perform
+ * reflection caching).
  *
  * @author Joe Walnes
  * @author J&ouml;rg Schaible
- * @deprecated As of upcoming, moved into internal util package.
+ * @deprecated As of 1.4.8, moved into internal util package.
  */
-@Deprecated
 public class SerializationMethodInvoker implements Caching {
 
     SerializationMembers serializationMembers = new SerializationMembers();
@@ -33,58 +32,50 @@ public class SerializationMethodInvoker implements Caching {
     /**
      * Resolves an object as native serialization does by calling readResolve(), if available.
      * 
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Deprecated
-    public Object callReadResolve(final Object result) {
+    public Object callReadResolve(Object result) {
         return serializationMembers.callReadResolve(result);
     }
 
     /**
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Deprecated
-    public Object callWriteReplace(final Object object) {
+    public Object callWriteReplace(Object object) {
         return serializationMembers.callWriteReplace(object);
     }
 
     /**
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Deprecated
-    public boolean supportsReadObject(final Class<?> type, final boolean includeBaseClasses) {
+    public boolean supportsReadObject(Class type, boolean includeBaseClasses) {
         return serializationMembers.supportsReadObject(type, includeBaseClasses);
     }
 
     /**
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Deprecated
-    public void callReadObject(final Class<?> type, final Object object, final ObjectInputStream stream) {
+    public void callReadObject(Class type, Object object, ObjectInputStream stream) {
         serializationMembers.callReadObject(type, object, stream);
     }
 
     /**
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Deprecated
-    public boolean supportsWriteObject(final Class<?> type, final boolean includeBaseClasses) {
+    public boolean supportsWriteObject(Class type, boolean includeBaseClasses) {
         return serializationMembers.supportsWriteObject(type, includeBaseClasses);
     }
 
     /**
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Deprecated
-    public void callWriteObject(final Class<?> type, final Object instance, final ObjectOutputStream stream) {
+    public void callWriteObject(Class type, Object instance, ObjectOutputStream stream) {
         serializationMembers.callWriteObject(type, instance, stream);
     }
 
     /**
-     * @deprecated As of upcoming, moved into internal util package.
+     * @deprecated As of 1.4.8, moved into internal util package.
      */
-    @Override
-    @Deprecated
     public void flushCache() {
         serializationMembers.flushCache();
     }

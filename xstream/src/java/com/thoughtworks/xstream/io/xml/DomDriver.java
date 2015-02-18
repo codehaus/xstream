@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004, 2005, 2006 Joe Walnes.
- * Copyright (C) 2006, 2007, 2008, 2009, 2011, 2014 XStream Committers.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2011 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -49,17 +49,17 @@ public class DomDriver extends AbstractXmlDriver {
     }
 
     /**
-     * Construct a DomDriver with a specified encoding. The created DomReader will ignore any encoding attribute of the
-     * XML header though.
+     * Construct a DomDriver with a specified encoding. The created DomReader will ignore any
+     * encoding attribute of the XML header though.
      */
-    public DomDriver(final String encoding) {
+    public DomDriver(String encoding) {
         this(encoding, new XmlFriendlyNameCoder());
     }
 
     /**
      * @since 1.4
      */
-    public DomDriver(final String encoding, final NameCoder nameCoder) {
+    public DomDriver(String encoding, NameCoder nameCoder) {
         super(nameCoder);
         documentBuilderFactory = DocumentBuilderFactory.newInstance();
         this.encoding = encoding;
@@ -69,60 +69,55 @@ public class DomDriver extends AbstractXmlDriver {
      * @since 1.2
      * @deprecated As of 1.4, use {@link #DomDriver(String, NameCoder)} instead.
      */
-    @Deprecated
-    public DomDriver(final String encoding, final XmlFriendlyReplacer replacer) {
+    public DomDriver(String encoding, XmlFriendlyReplacer replacer) {
         this(encoding, (NameCoder)replacer);
     }
 
-    @Override
-    public HierarchicalStreamReader createReader(final Reader in) {
+    public HierarchicalStreamReader createReader(Reader in) {
         return createReader(new InputSource(in));
     }
 
-    @Override
-    public HierarchicalStreamReader createReader(final InputStream in) {
+    public HierarchicalStreamReader createReader(InputStream in) {
         return createReader(new InputSource(in));
     }
 
-    @Override
-    public HierarchicalStreamReader createReader(final URL in) {
+    public HierarchicalStreamReader createReader(URL in) {
         return createReader(new InputSource(in.toExternalForm()));
     }
 
-    @Override
-    public HierarchicalStreamReader createReader(final File in) {
+    public HierarchicalStreamReader createReader(File in) {
         return createReader(new InputSource(in.toURI().toASCIIString()));
     }
 
-    private HierarchicalStreamReader createReader(final InputSource source) {
+    private HierarchicalStreamReader createReader(InputSource source) {
         try {
-            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             if (encoding != null) {
                 source.setEncoding(encoding);
             }
-            final Document document = documentBuilder.parse(source);
+            Document document = documentBuilder.parse(source);
             return new DomReader(document, getNameCoder());
-        } catch (final FactoryConfigurationError e) {
+        } catch (FactoryConfigurationError e) {
             throw new StreamException(e);
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             throw new StreamException(e);
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             throw new StreamException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new StreamException(e);
         }
     }
 
-    @Override
-    public HierarchicalStreamWriter createWriter(final Writer out) {
+    public HierarchicalStreamWriter createWriter(Writer out) {
         return new PrettyPrintWriter(out, getNameCoder());
     }
 
-    @Override
-    public HierarchicalStreamWriter createWriter(final OutputStream out) {
+    public HierarchicalStreamWriter createWriter(OutputStream out) {
         try {
-            return createWriter(encoding != null ? new OutputStreamWriter(out, encoding) : new OutputStreamWriter(out));
-        } catch (final UnsupportedEncodingException e) {
+            return createWriter(encoding != null
+                ? new OutputStreamWriter(out, encoding)
+                : new OutputStreamWriter(out));
+        } catch (UnsupportedEncodingException e) {
             throw new StreamException(e);
         }
     }

@@ -26,7 +26,6 @@ public class SerializationCallbackOrderTest extends AbstractAcceptanceTest {
     // static so it can be accessed by objects under test, without them needing a reference back to the testcase
     private static CallLog log = new CallLog();
 
-    @Override
     protected void setUp() throws Exception {
         super.setUp();
         log.reset();
@@ -139,13 +138,11 @@ public class SerializationCallbackOrderTest extends AbstractAcceptanceTest {
             log.actual("ProtectedChildOwnRR.readObject() end");
         }
 
-        @Override
         protected Object writeReplace() {
             log.actual("ProtectedChildOwnRR.writeReplace()");
             return this;
         }
 
-        @Override
         protected Object readResolve() {
             log.actual("ProtectedChildOwnRR.readResolve()");
             return this;
@@ -206,13 +203,11 @@ public class SerializationCallbackOrderTest extends AbstractAcceptanceTest {
             log.actual("PackageChildOwnRR.readObject() end");
         }
 
-        @Override
         Object writeReplace() {
             log.actual("PackageChildOwnRR.writeReplace()");
             return this;
         }
 
-        @Override
         Object readResolve() {
             log.actual("PackageChildOwnRR.readResolve()");
             return this;

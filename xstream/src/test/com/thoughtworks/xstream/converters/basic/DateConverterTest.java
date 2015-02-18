@@ -198,7 +198,7 @@ public class DateConverterTest extends TestCase {
 
         final String[] actual = new String[expected.length];
         for (int i = 0; i < actual.length; i++ ) {
-            final String converted = converter.toString((Date)format.parseObject(expected[i]));
+            final String converted = converter.toString(format.parseObject(expected[i]));
             // Note, XStream's string representation of the date is in IST 
             actual[i] = format.format(converter.fromString(converted));
         }

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005, 2006 Joe Walnes.
- * Copyright (C) 2006, 2007, 2008, 2009, 2011, 2013, 3014 XStream Committers.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2011, 2013 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -18,11 +18,9 @@ import com.thoughtworks.xstream.core.util.Primitives;
 
 
 /**
- * Default mapper implementation with 'vanilla' functionality.
- * <p>
- * To build up the functionality required, wrap this mapper with other mapper implementations.
- * </p>
- * 
+ * Default mapper implementation with 'vanilla' functionality. To build up the functionality required, wrap this mapper
+ * with other mapper implementations.
+ *
  * @author Joe Walnes
  * @author J&ouml;rg Schaible
  */
@@ -30,20 +28,21 @@ public class DefaultMapper implements Mapper {
 
     private static String XSTREAM_PACKAGE_ROOT;
     static {
-        final String packageName = DefaultMapper.class.getName();
-        final int idx = packageName.indexOf(".xstream.");
-        XSTREAM_PACKAGE_ROOT = idx > 0 ? packageName.substring(0, idx + 9) : ".N/A";
+        String packageName = DefaultMapper.class.getName();
+        int idx = packageName.indexOf(".xstream.");
+        XSTREAM_PACKAGE_ROOT = idx > 0 ? packageName.substring(0, idx+9) : ".N/A";
     }
-
+    
     private final ClassLoaderReference classLoaderReference;
 
+    
     /**
      * Construct a DefaultMapper.
      * 
      * @param classLoaderReference the reference to the classloader used by the XStream instance.
      * @since 1.4.5
      */
-    public DefaultMapper(final ClassLoaderReference classLoaderReference) {
+    public DefaultMapper(ClassLoaderReference classLoaderReference) {
         this.classLoaderReference = classLoaderReference;
     }
 
@@ -53,20 +52,17 @@ public class DefaultMapper implements Mapper {
      * @param classLoader the ClassLoader used by the XStream instance.
      * @deprecated As of 1.4.5 use {@link #DefaultMapper(ClassLoaderReference)}
      */
-    @Deprecated
-    public DefaultMapper(final ClassLoader classLoader) {
+    public DefaultMapper(ClassLoader classLoader) {
         this(new ClassLoaderReference(classLoader));
     }
 
-    @Override
-    public String serializedClass(final Class<?> type) {
+    public String serializedClass(Class type) {
         return type.getName();
     }
 
-    @Override
-    public Class<?> realClass(final String elementName) {
-        final Class<?> resultingClass = Primitives.primitiveType(elementName);
-        if (resultingClass != null) {
+    public Class realClass(String elementName) {
+        Class resultingClass = Primitives.primitiveType(elementName);
+        if( resultingClass != null ){
             return resultingClass;
         }
         try {
@@ -79,148 +75,119 @@ public class DefaultMapper implements Mapper {
                 initialize = elementName.charAt(0) == '[';
             }
             return Class.forName(elementName, initialize, classLoader);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new CannotResolveClassException(elementName);
         }
     }
 
-    @Override
-    public Class<?> defaultImplementationOf(final Class<?> type) {
+    public Class defaultImplementationOf(Class type) {
         return type;
     }
 
-    @Override
-    public String aliasForAttribute(final String attribute) {
+    public String aliasForAttribute(String attribute) {
         return attribute;
     }
 
-    @Override
-    public String attributeForAlias(final String alias) {
+    public String attributeForAlias(String alias) {
         return alias;
     }
 
-    @Override
-    public String aliasForSystemAttribute(final String attribute) {
+    public String aliasForSystemAttribute(String attribute) {
         return attribute;
     }
 
-    @Override
-    public boolean isImmutableValueType(final Class<?> type) {
+    public boolean isImmutableValueType(Class type) {
         return false;
     }
 
-    @Override
-    public String getFieldNameForItemTypeAndName(final Class<?> definedIn, final Class<?> itemType,
-            final String itemFieldName) {
+    public String getFieldNameForItemTypeAndName(Class definedIn, Class itemType, String itemFieldName) {
         return null;
     }
 
-    @Override
-    public Class<?> getItemTypeForItemFieldName(final Class<?> definedIn, final String itemFieldName) {
+    public Class getItemTypeForItemFieldName(Class definedIn, String itemFieldName) {
         return null;
     }
 
-    @Override
-    public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(final Class<?> itemType,
-            final String fieldName) {
+    public ImplicitCollectionMapping getImplicitCollectionDefForFieldName(Class itemType, String fieldName) {
         return null;
     }
 
-    @Override
-    public boolean shouldSerializeMember(final Class<?> definedIn, final String fieldName) {
+    public boolean shouldSerializeMember(Class definedIn, String fieldName) {
         return true;
     }
 
-    public String lookupName(final Class<?> type) {
+    public String lookupName(Class type) {
         return serializedClass(type);
     }
 
-    public Class<?> lookupType(final String elementName) {
+    public Class lookupType(String elementName) {
         return realClass(elementName);
     }
 
-    @Override
-    public String serializedMember(final Class<?> type, final String memberName) {
+    public String serializedMember(Class type, String memberName) {
         return memberName;
     }
 
-    @Override
-    public String realMember(final Class<?> type, final String serialized) {
+    public String realMember(Class type, String serialized) {
         return serialized;
     }
 
     /**
      * @deprecated As of 1.3, use {@link #getConverterFromAttribute(Class, String, Class)}
      */
-    @Deprecated
-    public SingleValueConverter getConverterFromAttribute(final String name) {
-        throw new UnsupportedOperationException();
+    public SingleValueConverter getConverterFromAttribute(String name) {
+        return null;
     }
 
     /**
      * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
      */
-    @Deprecated
-    public SingleValueConverter getConverterFromItemType(final String fieldName, final Class<?> type) {
-        throw new UnsupportedOperationException();
+    public SingleValueConverter getConverterFromItemType(String fieldName, Class type) {
+        return null;
     }
 
     /**
      * @deprecated As of 1.3, use {@link #getConverterFromItemType(String, Class, Class)}
      */
-    @Deprecated
-    public SingleValueConverter getConverterFromItemType(final Class<?> type) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public SingleValueConverter getConverterFromItemType(final String fieldName, final Class<?> type,
-            final Class<?> definedIn) {
+    public SingleValueConverter getConverterFromItemType(Class type) {
         return null;
     }
 
-    @Override
-    public Converter getLocalConverter(final Class<?> definedIn, final String fieldName) {
+    public SingleValueConverter getConverterFromItemType(String fieldName, Class type,
+        Class definedIn) {
         return null;
     }
 
-    @Override
-    public <T extends Mapper> T lookupMapperOfType(final Class<T> type) {
-        @SuppressWarnings("unchecked")
-        final T t = type.isAssignableFrom(getClass()) ? (T)this : null;
-        return t;
-    }
-
-    /**
-     * @deprecated As of 1.3, use combination of {@link #serializedMember(Class, String)} and
-     *             {@link #getConverterFromItemType(String, Class, Class)}
-     */
-    @Deprecated
-    public String aliasForAttribute(final Class<?> definedIn, final String fieldName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @deprecated As of 1.3, use combination of {@link #realMember(Class, String)} and
-     *             {@link #getConverterFromItemType(String, Class, Class)}
-     */
-    @Deprecated
-    public String attributeForAlias(final Class<?> definedIn, final String alias) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @deprecated As of 1.3.1, use {@link #getConverterFromAttribute(Class, String, Class)}
-     */
-    @Deprecated
-    @Override
-    public SingleValueConverter getConverterFromAttribute(final Class<?> definedIn, final String attribute) {
+    public Converter getLocalConverter(Class definedIn, String fieldName) {
         return null;
     }
 
-    @Override
-    public SingleValueConverter getConverterFromAttribute(final Class<?> definedIn, final String attribute,
-            final Class<?> type) {
+    public Mapper lookupMapperOfType(Class type) {
+        return null;
+    }
+
+    /**
+     * @deprecated As of 1.3, use combination of {@link #serializedMember(Class, String)} and {@link #getConverterFromItemType(String, Class, Class)} 
+     */
+    public String aliasForAttribute(Class definedIn, String fieldName) {
+        return fieldName;
+    }
+
+    /**
+     * @deprecated As of 1.3, use combination of {@link #realMember(Class, String)} and {@link #getConverterFromItemType(String, Class, Class)} 
+     */
+    public String attributeForAlias(Class definedIn, String alias) {
+        return alias;
+    }
+
+    /**
+     * @deprecated As of 1.3.1, use {@link #getConverterFromAttribute(Class, String, Class)} 
+     */
+    public SingleValueConverter getConverterFromAttribute(Class definedIn, String attribute) {
+        return null;
+    }
+
+    public SingleValueConverter getConverterFromAttribute(Class definedIn, String attribute, Class type) {
         return null;
     }
 }

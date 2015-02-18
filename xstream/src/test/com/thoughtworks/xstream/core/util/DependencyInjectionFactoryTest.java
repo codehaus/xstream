@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, 2009, 2010, 2011, 2012, 2014 XStream Committers.
+ * Copyright (C) 2007, 2009, 2010, 2011, 2012 XStream Committers.
  * All rights reserved.
  *
  * The software in this package is published under the terms of the BSD
@@ -10,18 +10,19 @@
  */
 package com.thoughtworks.xstream.core.util;
 
-import java.util.BitSet;
-
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
 
 import junit.framework.TestCase;
+
+import java.util.BitSet;
 
 
 public class DependencyInjectionFactoryTest extends TestCase {
     public void testDependencyInjectionWithMatchingParameterSequence() {
         final BitSet used = new BitSet();
-        final Exception exception = DependencyInjectionFactory.newInstance(used, ObjectAccessException.class,
-            "The message", this, new RuntimeException("JUnit"));
+        final Exception exception = (Exception)DependencyInjectionFactory.newInstance(
+            ObjectAccessException.class, new Object[]{
+                "The message", this, new RuntimeException("JUnit")}, used);
         assertTrue(exception instanceof ObjectAccessException);
         assertEquals("The message : JUnit", exception.getMessage());
         assertEquals("JUnit", ((ObjectAccessException)exception).getCause().getMessage());
@@ -32,15 +33,17 @@ public class DependencyInjectionFactoryTest extends TestCase {
 
     public void testWillUseDefaultConstructor() {
         final BitSet used = new BitSet();
-        final String string = DependencyInjectionFactory.newInstance(used, String.class, this);
+        final String string = (String)DependencyInjectionFactory.newInstance(
+            String.class, new Object[]{this}, used);
         assertEquals("", string);
         assertFalse(used.get(0));
     }
 
     public void testWillMatchNullValue() {
         final BitSet used = new BitSet();
-        final Exception exception = DependencyInjectionFactory.newInstance(used, ObjectAccessException.class,
-            new TypedNull<String>(String.class), this, new RuntimeException("JUnit"));
+        final Exception exception = (Exception)DependencyInjectionFactory.newInstance(
+            ObjectAccessException.class, new Object[]{
+                new TypedNull(String.class), this, new RuntimeException("JUnit")}, used);
         assertTrue(exception instanceof ObjectAccessException);
         assertEquals("null : JUnit", exception.getMessage());
         assertTrue(used.get(0));
@@ -50,8 +53,9 @@ public class DependencyInjectionFactoryTest extends TestCase {
 
     public void testWillMatchPrimitives() {
         final BitSet used = new BitSet();
-        final String string = DependencyInjectionFactory
-            .newInstance(used, String.class, "JUnit".getBytes(), 1, this, 4);
+        final String string = (String)DependencyInjectionFactory.newInstance(
+            String.class,
+            new Object[]{"JUnit".getBytes(), new Integer(1), this, new Integer(4)}, used);
         assertEquals("Unit", string);
         assertTrue(used.get(0));
         assertTrue(used.get(1));
@@ -61,8 +65,9 @@ public class DependencyInjectionFactoryTest extends TestCase {
 
     public void testWillUseArbitraryOrder() {
         final BitSet used = new BitSet();
-        final Exception exception = DependencyInjectionFactory.newInstance(used, ObjectAccessException.class,
-            new RuntimeException("JUnit"), this, "The message");
+        final Exception exception = (Exception)DependencyInjectionFactory.newInstance(
+            ObjectAccessException.class, new Object[]{
+                new RuntimeException("JUnit"), this, "The message"}, used);
         assertTrue(exception instanceof ObjectAccessException);
         assertEquals("The message : JUnit", exception.getMessage());
         assertTrue(used.get(0));
@@ -72,8 +77,10 @@ public class DependencyInjectionFactoryTest extends TestCase {
 
     public void testWillMatchMostSpecificDependency() {
         final BitSet used = new BitSet();
-        final Exception exception = DependencyInjectionFactory.newInstance(used, ObjectAccessException.class,
-            new RuntimeException("JUnit"), new IllegalArgumentException("foo"), this, "The message");
+        final Exception exception = (Exception)DependencyInjectionFactory.newInstance(
+            ObjectAccessException.class, new Object[]{
+                new RuntimeException("JUnit"), new IllegalArgumentException("foo"), this,
+                "The message"}, used);
         assertTrue(exception instanceof ObjectAccessException);
         assertEquals("The message : foo", exception.getMessage());
         assertFalse(used.get(0));
@@ -84,8 +91,10 @@ public class DependencyInjectionFactoryTest extends TestCase {
 
     public void testWillMatchFirstMatchingDependency() {
         final BitSet used = new BitSet();
-        final Exception exception = DependencyInjectionFactory.newInstance(used, ObjectAccessException.class,
-            new RuntimeException("JUnit"), "The message", "bar", new IllegalArgumentException("foo"), this);
+        final Exception exception = (Exception)DependencyInjectionFactory.newInstance(
+            ObjectAccessException.class, new Object[]{
+                new RuntimeException("JUnit"), "The message", "bar",
+                new IllegalArgumentException("foo"), this}, used);
         assertTrue(exception instanceof ObjectAccessException);
         assertEquals("The message : foo", exception.getMessage());
         assertFalse(used.get(0));
@@ -104,19 +113,19 @@ public class DependencyInjectionFactoryTest extends TestCase {
             this(1, 2, null);
         }
 
-        public Thing(final Number num) {
+        public Thing(Number num) {
             this(num.intValue(), 8 * num.intValue(), null);
         }
 
-        public Thing(final String str, final TestCase testCase) {
+        public Thing(String str, TestCase testCase) {
             this(str.length(), 4 * str.length(), testCase);
         }
 
-        public Thing(final Number num, final TestCase testCase) {
+        public Thing(Number num, TestCase testCase) {
             this(num.intValue(), 4 * num.intValue(), testCase);
         }
 
-        public Thing(final int first, final int second, final TestCase testCase) {
+        public Thing(int first, int second, TestCase testCase) {
             this.first = first;
             this.second = second;
             this.testCase = testCase;
@@ -137,7 +146,8 @@ public class DependencyInjectionFactoryTest extends TestCase {
 
     public void testWillMatchArbitraryOrderForOneAvailableConstructorOnly() {
         final BitSet used = new BitSet();
-        final Thing thing = DependencyInjectionFactory.newInstance(used, Thing.class, this, 1, 2);
+        final Thing thing = (Thing)DependencyInjectionFactory.newInstance(
+            Thing.class, new Object[]{this, new Integer(1), new Integer(2)}, used);
         assertSame(this, thing.getTestCase());
         assertEquals(1, thing.getFirst());
         assertEquals(2, thing.getSecond());
@@ -145,37 +155,41 @@ public class DependencyInjectionFactoryTest extends TestCase {
         assertTrue(used.get(1));
         assertTrue(used.get(2));
     }
-
+    
     public void testWillSelectMatchingConstructor() {
         BitSet used = new BitSet();
-        Thing thing = DependencyInjectionFactory.newInstance(used, Thing.class, this, 1);
+        Thing thing = (Thing)DependencyInjectionFactory.newInstance(
+            Thing.class, new Object[]{this, new Integer(1)}, used);
         assertSame(this, thing.getTestCase());
         assertEquals(1, thing.getFirst());
         assertEquals(4, thing.getSecond());
         assertTrue(used.get(0));
         assertTrue(used.get(1));
-
+        
         used = new BitSet();
-        thing = DependencyInjectionFactory.newInstance(used, Thing.class, this, "a");
+        thing = (Thing)DependencyInjectionFactory.newInstance(
+            Thing.class, new Object[]{this, "a"}, used);
         assertSame(this, thing.getTestCase());
         assertEquals(1, thing.getFirst());
         assertEquals(4, thing.getSecond());
         assertTrue(used.get(0));
         assertTrue(used.get(1));
     }
-
+    
     public void testWillSelectMatchingConstructorForFirstMatchingArguments() {
         BitSet used = new BitSet();
-        Thing thing = DependencyInjectionFactory.newInstance(used, Thing.class, this, 1, "foo");
+        Thing thing = (Thing)DependencyInjectionFactory.newInstance(
+            Thing.class, new Object[]{this, new Integer(1), "foo"}, used);
         assertSame(this, thing.getTestCase());
         assertEquals(1, thing.getFirst());
         assertEquals(4, thing.getSecond());
         assertTrue(used.get(0));
         assertTrue(used.get(1));
         assertFalse(used.get(2));
-
+        
         used = new BitSet();
-        thing = DependencyInjectionFactory.newInstance(used, Thing.class, this, "foo", 1);
+        thing = (Thing)DependencyInjectionFactory.newInstance(
+            Thing.class, new Object[]{this, "foo", new Integer(1)}, used);
         assertSame(this, thing.getTestCase());
         assertEquals(3, thing.getFirst());
         assertEquals(12, thing.getSecond());

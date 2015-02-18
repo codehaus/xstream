@@ -39,7 +39,7 @@ public class LambdaTest extends AbstractAcceptanceTest {
 
         final String expected = "" + "<keeper>\n" + "  <callable class=\"null\"/>\n" + "</keeper>";
         xstream.alias("keeper", LambdaKeeper.class);
-        xstream.allowTypes(SerializedLambda.class);
+        xstream.allowTypes(new Class[]{SerializedLambda.class});
 
         assertEquals(expected, xstream.toXML(keeper));
         assertBothWays(xstream.fromXML(expected), "<keeper/>");
@@ -65,7 +65,7 @@ public class LambdaTest extends AbstractAcceptanceTest {
             + "  </callable>\n"
             + "</keeper>";
         xstream.alias("keeper", LambdaKeeper.class);
-        xstream.allowTypes(SerializedLambda.class);
+        xstream.allowTypes(new Class[]{SerializedLambda.class});
 
         assertBothWaysNormalized(keeper, expected);
 
@@ -96,7 +96,7 @@ public class LambdaTest extends AbstractAcceptanceTest {
             + "  <referenced class=\"java.util.concurrent.Callable\" reference=\"../callable\"/>\n"
             + "</keeper>";
         xstream.alias("keeper", LambdaKeeper.class);
-        xstream.allowTypes(SerializedLambda.class);
+        xstream.allowTypes(new Class[]{SerializedLambda.class});
 
         assertBothWaysNormalized(keeper, expected);
     }
@@ -180,7 +180,7 @@ public class LambdaTest extends AbstractAcceptanceTest {
         xstream.alias("callable", Callable.class);
         xstream.alias("runnable", Runnable.class);
         xstream.alias("serializable-callable", SerializableCallable.class);
-        xstream.allowTypes(SerializedLambda.class, LambdaTest.class);
+        xstream.allowTypes(new Class[]{SerializedLambda.class, LambdaTest.class});
 
         assertBothWaysNormalized(lambdas, expected);
     }

@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.reflection.ObjectAccessException;
@@ -38,25 +36,29 @@ import com.thoughtworks.xstream.core.Caching;
  */
 public class SerializationMembers implements Caching {
 
-    private static final Method NO_METHOD = new Object() {
-        @SuppressWarnings("unused")
+    private static final Method NO_METHOD = (new Object() {
         private void noMethod() {
         }
-    }.getClass().getDeclaredMethods()[0];
-    private static final Map<String, ObjectStreamField> NO_FIELDS = Collections.emptyMap();
+    }).getClass().getDeclaredMethods()[0];
+    private static final Object[] EMPTY_ARGS = new Object[0];
+    private static final Class[] EMPTY_CLASSES = new Class[0];
+    private static final Map NO_FIELDS = Collections.EMPTY_MAP;
     private static final int PERSISTENT_FIELDS_MODIFIER = Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL;
     private static final FastField[] OBJECT_TYPE_FIELDS = {
-        new FastField(Object.class, "readResolve"), new FastField(Object.class, "writeReplace"),
-        new FastField(Object.class, "readObject"), new FastField(Object.class, "writeObject")};
-    private final ConcurrentMap<FastField, Method> declaredCache = new ConcurrentHashMap<FastField, Method>();
-    private final ConcurrentMap<FastField, Method> resRepCache = new ConcurrentHashMap<FastField, Method>();
-    private final ConcurrentMap<String, Map<String, ObjectStreamField>> fieldCache = new ConcurrentHashMap<String, Map<String, ObjectStreamField>>();
+        new FastField(Object.class, "readResolve"), 
+        new FastField(Object.class, "writeReplace"), 
+        new FastField(Object.class, "readObject"), 
+        new FastField(Object.class, "writeObject")
+    };
+    private Map declaredCache = Collections.synchronizedMap(new HashMap());
+    private Map resRepCache = Collections.synchronizedMap(new HashMap());
+    private final Map fieldCache = Collections.synchronizedMap(new HashMap());
     {
-        for (final FastField element : OBJECT_TYPE_FIELDS) {
-            declaredCache.put(element, NO_METHOD);
+        for(int i = 0; i < OBJECT_TYPE_FIELDS.length; ++i) {
+            declaredCache.put(OBJECT_TYPE_FIELDS[i], NO_METHOD);
         }
-        for (final FastField element : Arrays.copyOf(OBJECT_TYPE_FIELDS, 2)) {
-            resRepCache.put(element, NO_METHOD);
+        for(int i = 0; i < 2; ++i) {
+            resRepCache.put(OBJECT_TYPE_FIELDS[i], NO_METHOD);
         }
     }
 
@@ -67,16 +69,19 @@ public class SerializationMembers implements Caching {
         if (result == null) {
             return null;
         } else {
-            final Class<? extends Object> resultType = result.getClass();
+            final Class resultType = result.getClass();
             final Method readResolveMethod = getRRMethod(resultType, "readResolve");
             if (readResolveMethod != null) {
                 try {
-                    return readResolveMethod.invoke(result);
-                } catch (final IllegalAccessException e) {
-                    throw new ObjectAccessException("Could not call " + resultType.getName() + ".readResolve()", e);
-                } catch (final InvocationTargetException e) {
-                    throw new ObjectAccessException("Could not call " + resultType.getName() + ".readResolve()", e
-                        .getTargetException());
+                    return readResolveMethod.invoke(result, EMPTY_ARGS);
+                } catch (IllegalAccessException e) {
+                    throw new ObjectAccessException("Could not call "
+                        + resultType.getName()
+                        + ".readResolve()", e);
+                } catch (InvocationTargetException e) {
+                    throw new ObjectAccessException("Could not call "
+                        + resultType.getName()
+                        + ".readResolve()", e.getTargetException());
                 }
             } else {
                 return result;
@@ -88,16 +93,19 @@ public class SerializationMembers implements Caching {
         if (object == null) {
             return null;
         } else {
-            final Class<? extends Object> objectType = object.getClass();
+            final Class objectType = object.getClass();
             final Method writeReplaceMethod = getRRMethod(objectType, "writeReplace");
             if (writeReplaceMethod != null) {
                 try {
-                    return writeReplaceMethod.invoke(object);
-                } catch (final IllegalAccessException e) {
-                    throw new ObjectAccessException("Could not call " + objectType.getName() + ".writeReplace()", e);
-                } catch (final InvocationTargetException e) {
-                    throw new ObjectAccessException("Could not call " + objectType.getName() + ".writeReplace()", e
-                        .getTargetException());
+                    return writeReplaceMethod.invoke(object, EMPTY_ARGS);
+                } catch (IllegalAccessException e) {
+                    throw new ObjectAccessException("Could not call "
+                        + objectType.getName()
+                        + ".writeReplace()", e);
+                } catch (InvocationTargetException e) {
+                    throw new ObjectAccessException("Could not call "
+                        + objectType.getName()
+                        + ".writeReplace()", e.getTargetException());
                 }
             } else {
                 return object;
@@ -105,118 +113,129 @@ public class SerializationMembers implements Caching {
         }
     }
 
-    public boolean supportsReadObject(final Class<?> type, final boolean includeBaseClasses) {
-        return getMethod(type, "readObject", includeBaseClasses, ObjectInputStream.class) != null;
+    public boolean supportsReadObject(final Class type, final boolean includeBaseClasses) {
+        return getMethod(
+            type, "readObject", new Class[]{ObjectInputStream.class}, includeBaseClasses) != null;
     }
 
-    public void callReadObject(final Class<?> type, final Object object, final ObjectInputStream stream) {
+    public void callReadObject(final Class type, final Object object, final ObjectInputStream stream) {
         try {
-            final Method readObjectMethod = getMethod(type, "readObject", false, ObjectInputStream.class);
-            readObjectMethod.invoke(object, stream);
-        } catch (final IllegalAccessException e) {
-            throw new ConversionException("Could not call " + object.getClass().getName() + ".readObject()", e);
-        } catch (final InvocationTargetException e) {
-            throw new ConversionException("Could not call " + object.getClass().getName() + ".readObject()", e
-                .getTargetException());
+            Method readObjectMethod = getMethod(
+                type, "readObject", new Class[]{ObjectInputStream.class}, false);
+            readObjectMethod.invoke(object, new Object[]{stream});
+        } catch (IllegalAccessException e) {
+            throw new ConversionException("Could not call "
+                + object.getClass().getName()
+                + ".readObject()", e);
+        } catch (InvocationTargetException e) {
+            throw new ConversionException("Could not call "
+                + object.getClass().getName()
+                + ".readObject()", e.getTargetException());
         }
     }
 
-    public boolean supportsWriteObject(final Class<?> type, final boolean includeBaseClasses) {
-        return getMethod(type, "writeObject", includeBaseClasses, ObjectOutputStream.class) != null;
+    public boolean supportsWriteObject(final Class type, final boolean includeBaseClasses) {
+        return getMethod(
+            type, "writeObject", new Class[]{ObjectOutputStream.class}, includeBaseClasses) != null;
     }
 
-    public void callWriteObject(final Class<?> type, final Object instance, final ObjectOutputStream stream) {
+    public void callWriteObject(final Class type, final Object instance, final ObjectOutputStream stream) {
         try {
-            final Method readObjectMethod = getMethod(type, "writeObject", false, ObjectOutputStream.class);
-            readObjectMethod.invoke(instance, stream);
-        } catch (final IllegalAccessException e) {
-            throw new ConversionException("Could not call " + instance.getClass().getName() + ".writeObject()", e);
-        } catch (final InvocationTargetException e) {
-            throw new ConversionException("Could not call " + instance.getClass().getName() + ".writeObject()", e
-                .getTargetException());
+            Method readObjectMethod = getMethod(
+                type, "writeObject", new Class[]{ObjectOutputStream.class}, false);
+            readObjectMethod.invoke(instance, new Object[]{stream});
+        } catch (IllegalAccessException e) {
+            throw new ConversionException("Could not call "
+                + instance.getClass().getName()
+                + ".writeObject()", e);
+        } catch (InvocationTargetException e) {
+            throw new ConversionException("Could not call "
+                + instance.getClass().getName()
+                + ".writeObject()", e.getTargetException());
         }
     }
 
-    private Method getMethod(final Class<?> type, final String name, final boolean includeBaseclasses,
-            final Class<?>... parameterTypes) {
-        final Method method = getMethod(type, name, parameterTypes);
-        return method == NO_METHOD || !includeBaseclasses && !method.getDeclaringClass().equals(type) ? null : method;
-    }
-
-    private Method getMethod(final Class<?> type, final String name, final Class<?>... parameterTypes) {
-        if (type == null) {
-            return null;
+    private Method getMethod(Class type, String name, Class[] parameterTypes,
+            boolean includeBaseclasses) {
+            Method method = getMethod(type, name, parameterTypes);
+            return method == NO_METHOD
+                || (!includeBaseclasses && !method.getDeclaringClass().equals(type))
+                ? null
+                : method;
         }
-        final FastField method = new FastField(type, name);
-        Method result = declaredCache.get(method);
 
-        if (result == null) {
-            try {
-                result = type.getDeclaredMethod(name, parameterTypes);
-                if (!result.isAccessible()) {
-                    result.setAccessible(true);
-                }
-            } catch (final NoSuchMethodException e) {
-                result = getMethod(type.getSuperclass(), name, parameterTypes);
+        private Method getMethod(Class type, String name, Class[] parameterTypes) {
+            if (type == null) {
+                return null;
             }
-            declaredCache.put(method, result);
-        }
-        return result;
-    }
-
-    private Method getRRMethod(final Class<?> type, final String name) {
-        final FastField method = new FastField(type, name);
-        Method result = resRepCache.get(method);
-        if (result == null) {
-            result = getMethod(type, name, true);
-            if (result != null && result.getDeclaringClass() != type) {
-                if ((result.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0) {
-                    if ((result.getModifiers() & Modifier.PRIVATE) > 0
-                            || type.getPackage() != result.getDeclaringClass().getPackage()) {
-                        result = NO_METHOD;
+            FastField method = new FastField(type, name);
+            Method result = (Method)declaredCache.get(method);
+            if (result == null) {
+                try {
+                    result = type.getDeclaredMethod(name, parameterTypes);
+                    if (!result.isAccessible()) {
+                        result.setAccessible(true);
                     }
+                } catch (NoSuchMethodException e) {
+                    result = getMethod(type.getSuperclass(), name, parameterTypes);
                 }
-            } else if (result == null) {
-                result = NO_METHOD;
+                declaredCache.put(method, result);
             }
-            resRepCache.putIfAbsent(method, result);
+            return result;
         }
-        return result == NO_METHOD ? null : result;
-    }
 
-    public Map<String, ObjectStreamField> getSerializablePersistentFields(final Class<?> type) {
-        if (type == null) {
-            return null;
-        }
-        Map<String, ObjectStreamField> result = fieldCache.get(type.getName());
-        if (result == null) {
-            try {
-                final Field field = type.getDeclaredField("serialPersistentFields");
-                if ((field.getModifiers() & PERSISTENT_FIELDS_MODIFIER) == PERSISTENT_FIELDS_MODIFIER) {
-                    field.setAccessible(true);
-                    final ObjectStreamField[] fields = (ObjectStreamField[])field.get(null);
-                    if (fields != null) {
-                        result = new HashMap<String, ObjectStreamField>();
-                        for (final ObjectStreamField f : fields) {
-                            result.put(f.getName(), f);
+        private Method getRRMethod(final Class type, final String name) {
+            final FastField method = new FastField(type, name);
+            Method result = (Method)resRepCache.get(method);
+            if (result == null) {
+                result = getMethod(type, name, EMPTY_CLASSES, true);
+                if (result != null && result.getDeclaringClass() != type) {
+                    if ((result.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) == 0) {
+                        if ((result.getModifiers() & Modifier.PRIVATE) > 0
+                                || type.getPackage() != result.getDeclaringClass().getPackage()) {
+                            result = NO_METHOD;
                         }
                     }
+                } else if (result == null) {
+                    result = NO_METHOD;
                 }
-            } catch (final NoSuchFieldException e) {
-            } catch (final IllegalAccessException e) {
-                throw new ObjectAccessException("Cannot get " + type.getName() + ".serialPersistentFields.", e);
-            } catch (final ClassCastException e) {
-                throw new ObjectAccessException("Cannot get " + type.getName() + ".serialPersistentFields.", e);
+                resRepCache.put(method, result);
             }
-            if (result == null) {
-                result = NO_FIELDS;
-            }
-            fieldCache.putIfAbsent(type.getName(), result);
+            return result == NO_METHOD ? null : result;
         }
-        return result == NO_FIELDS ? null : result;
-    }
 
-    @Override
+        public Map getSerializablePersistentFields(final Class type) {
+            if (type == null) {
+                return null;
+            }
+            Map result = (Map)fieldCache.get(type.getName());
+            if (result == null) {
+                try {
+                    final Field field = type.getDeclaredField("serialPersistentFields");
+                    if ((field.getModifiers() & PERSISTENT_FIELDS_MODIFIER) == PERSISTENT_FIELDS_MODIFIER) {
+                        field.setAccessible(true);
+                        final ObjectStreamField[] fields = (ObjectStreamField[])field.get(null);
+                        if (fields != null) {
+                            result = new HashMap();
+                            for (int i = 0; i < fields.length; ++i) {
+                                result.put(fields[i].getName(), fields[i]);
+                            }
+                        }
+                    }
+                } catch (final NoSuchFieldException e) {
+                } catch (final IllegalAccessException e) {
+                    throw new ObjectAccessException("Cannot get " + type.getName() + ".serialPersistentFields.", e);
+                } catch (final ClassCastException e) {
+                    throw new ObjectAccessException("Cannot get " + type.getName() + ".serialPersistentFields.", e);
+                }
+                if (result == null) {
+                    result = NO_FIELDS;
+                }
+                fieldCache.put(type.getName(), result);
+            }
+            return result == NO_FIELDS ? null : result;
+        }
+
     public void flushCache() {
         declaredCache.keySet().retainAll(Arrays.asList(OBJECT_TYPE_FIELDS));
         resRepCache.keySet().retainAll(Arrays.asList(OBJECT_TYPE_FIELDS));

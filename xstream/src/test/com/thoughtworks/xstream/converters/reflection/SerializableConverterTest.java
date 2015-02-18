@@ -81,7 +81,6 @@ public class SerializableConverterTest extends TestCase {
     
     public void testCanOmitFieldAtDeserialization() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SimpleType.class);
         xstream.alias("simple", SimpleType.class);
         xstream.omitField(SimpleType.class, "two");
         xstream.omitField(SimpleType.class, "x");
@@ -155,7 +154,6 @@ public class SerializableConverterTest extends TestCase {
     
     public void testCanOmitInheritedFieldAtDeserialization() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SimpleType.class, ExtendedType.class);
         xstream.alias("extended", ExtendedType.class);
         xstream.alias("simple", SimpleType.class);
         xstream.omitField(SimpleType.class, "two");
@@ -228,7 +226,6 @@ public class SerializableConverterTest extends TestCase {
     
     public void testCanOmitNamedFieldAtSerialization() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SimpleNamedFieldsType.class);
         xstream.alias("simple", SimpleNamedFieldsType.class);
         xstream.omitField(SimpleNamedFieldsType.class, "s2");
         
@@ -251,7 +248,6 @@ public class SerializableConverterTest extends TestCase {
     
     public void testCanOmitNamedFieldAtDeserialization() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SimpleNamedFieldsType.class);
         xstream.alias("simple", SimpleNamedFieldsType.class);
         xstream.omitField(SimpleNamedFieldsType.class, "s2");
         xstream.omitField(SimpleNamedFieldsType.class, "x");
@@ -276,7 +272,6 @@ public class SerializableConverterTest extends TestCase {
     
     public void testCanAliasField() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SimpleType.class);
         xstream.alias("simple", SimpleType.class);
         xstream.aliasField("s2", SimpleType.class, "two");
         
@@ -302,7 +297,6 @@ public class SerializableConverterTest extends TestCase {
 
     public void testCanAliasNamedField() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SimpleNamedFieldsType.class);
         xstream.alias("simple", SimpleNamedFieldsType.class);
         xstream.aliasField("two", SimpleNamedFieldsType.class, "s2");
         
@@ -332,7 +326,6 @@ public class SerializableConverterTest extends TestCase {
     
     public void testCanHandleFieldsDeclaredWithSerializableInterface() {
         XStream xstream = new XStream();
-        xstream.allowTypes(SerializableType.class);
         xstream.alias("sertype", SerializableType.class);
         xstream.useAttributeFor(SerializableType.class, "serializable");
         

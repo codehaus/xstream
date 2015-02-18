@@ -55,15 +55,16 @@ public class XStreamerTest extends AbstractAcceptanceTest {
             xstream.toXML(c);
             fail("Thrown " + ConversionException.class.getName() + " expected");
         } catch (final ConversionException e) {
-            assertTrue(e.getMessage().contains("XStream instance"));
+            assertTrue(e.getMessage().indexOf("XStream instance")>=0);
         }
     }
     
     public void testCanConvertAnotherInstance() throws TransformerException { 
         XStream x = createXStream();
         final String xml = normalizedXStreamXML(xstream.toXML(x));
-        for(final TypePermission permission : XStreamer.getDefaultPermissions())
-            xstream.addPermission(permission);
+        final TypePermission[] permissions = XStreamer.getDefaultPermissions();
+        for(int i = 0; i < permissions.length; ++i)
+            xstream.addPermission(permissions[i]);
         final XStream serialized = (XStream)xstream.fromXML(xml);
         final String xmlSerialized = normalizedXStreamXML(xstream.toXML(serialized));
         assertEquals(xml, xmlSerialized);
@@ -71,8 +72,9 @@ public class XStreamerTest extends AbstractAcceptanceTest {
     
     public void testCanBeUsedAfterSerialization() throws TransformerException {
         final String xml = xstream.toXML(createXStream());
-        for(final TypePermission permission : XStreamer.getDefaultPermissions())
-            xstream.addPermission(permission);
+        final TypePermission[] permissions = XStreamer.getDefaultPermissions();
+        for(int i = 0; i < permissions.length; ++i)
+            xstream.addPermission(permissions[i]);
         xstream = (XStream)xstream.fromXML(xml);
         testCanConvertAnotherInstance();
     }

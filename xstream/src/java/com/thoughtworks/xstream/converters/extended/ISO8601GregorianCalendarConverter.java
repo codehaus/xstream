@@ -11,25 +11,23 @@
  */
 package com.thoughtworks.xstream.converters.extended;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import com.thoughtworks.xstream.converters.ConversionException;
+import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 
 /**
- * A converter for {@link GregorianCalendar} conforming to the ISO8601 standard.
- * <p>
- * The converter will always serialize the calendar value in UTC and deserialize it to a value in the current default
- * time zone.
- * </p>
+ * A GregorianCalendarConverter conforming to the ISO8601 standard. The converter will always
+ * serialize the calendar value in UTC and deserialize it to a value in the current default time
+ * zone.
  * 
  * @author Mauro Talevi
  * @author J&ouml;rg Schaible
@@ -37,87 +35,85 @@ import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
  * @since 1.1.3
  */
 public class ISO8601GregorianCalendarConverter extends AbstractSingleValueConverter {
-    private static final DateTimeFormatter[] formattersUTC = new DateTimeFormatter[]{ //
-    ISODateTimeFormat.dateTime(), //
-        ISODateTimeFormat.dateTimeNoMillis(), //
-        ISODateTimeFormat.basicDateTime(), //
-        ISODateTimeFormat.basicOrdinalDateTime(), //
-        ISODateTimeFormat.basicOrdinalDateTimeNoMillis(), //
-        ISODateTimeFormat.basicTime(), //
-        ISODateTimeFormat.basicTimeNoMillis(), //
-        ISODateTimeFormat.basicTTime(), //
-        ISODateTimeFormat.basicTTimeNoMillis(), //
-        ISODateTimeFormat.basicWeekDateTime(), //
-        ISODateTimeFormat.basicWeekDateTimeNoMillis(), //
-        ISODateTimeFormat.ordinalDateTime(), //
-        ISODateTimeFormat.ordinalDateTimeNoMillis(), //
-        ISODateTimeFormat.time(), //
-        ISODateTimeFormat.timeNoMillis(), //
-        ISODateTimeFormat.tTime(), //
-        ISODateTimeFormat.tTimeNoMillis(), //
-        ISODateTimeFormat.weekDateTime(), //
-        ISODateTimeFormat.weekDateTimeNoMillis() //
+    private static final DateTimeFormatter[] formattersUTC = new DateTimeFormatter[]{
+        ISODateTimeFormat.dateTime(),
+        ISODateTimeFormat.dateTimeNoMillis(),
+        ISODateTimeFormat.basicDateTime(),
+        ISODateTimeFormat.basicOrdinalDateTime(),
+        ISODateTimeFormat.basicOrdinalDateTimeNoMillis(),
+        ISODateTimeFormat.basicTime(),
+        ISODateTimeFormat.basicTimeNoMillis(),
+        ISODateTimeFormat.basicTTime(),
+        ISODateTimeFormat.basicTTimeNoMillis(),
+        ISODateTimeFormat.basicWeekDateTime(),
+        ISODateTimeFormat.basicWeekDateTimeNoMillis(),
+        ISODateTimeFormat.ordinalDateTime(),
+        ISODateTimeFormat.ordinalDateTimeNoMillis(),
+        ISODateTimeFormat.time(),
+        ISODateTimeFormat.timeNoMillis(),
+        ISODateTimeFormat.tTime(),
+        ISODateTimeFormat.tTimeNoMillis(),
+        ISODateTimeFormat.weekDateTime(),
+        ISODateTimeFormat.weekDateTimeNoMillis()
     };
-    private static final DateTimeFormatter[] formattersNoUTC = new DateTimeFormatter[]{ //
-    ISODateTimeFormat.basicDate(), //
-        ISODateTimeFormat.basicOrdinalDate(), //
-        ISODateTimeFormat.basicWeekDate(), //
-        ISODateTimeFormat.date(), //
-        ISODateTimeFormat.dateHour(), //
-        ISODateTimeFormat.dateHourMinute(), //
-        ISODateTimeFormat.dateHourMinuteSecond(), //
-        ISODateTimeFormat.dateHourMinuteSecondFraction(), //
-        ISODateTimeFormat.dateHourMinuteSecondMillis(), //
-        ISODateTimeFormat.hour(), //
-        ISODateTimeFormat.hourMinute(), //
-        ISODateTimeFormat.hourMinuteSecond(), //
-        ISODateTimeFormat.hourMinuteSecondFraction(), //
-        ISODateTimeFormat.hourMinuteSecondMillis(), //
-        ISODateTimeFormat.ordinalDate(), //
-        ISODateTimeFormat.weekDate(), //
-        ISODateTimeFormat.year(), //
-        ISODateTimeFormat.yearMonth(), //
-        ISODateTimeFormat.yearMonthDay(), //
-        ISODateTimeFormat.weekyear(), //
-        ISODateTimeFormat.weekyearWeek(), //
-        ISODateTimeFormat.weekyearWeekDay() //
+    private static final DateTimeFormatter[] formattersNoUTC = new DateTimeFormatter[]{
+        ISODateTimeFormat.basicDate(),
+        ISODateTimeFormat.basicOrdinalDate(),
+        ISODateTimeFormat.basicWeekDate(),
+        ISODateTimeFormat.date(),
+        ISODateTimeFormat.dateHour(),
+        ISODateTimeFormat.dateHourMinute(),
+        ISODateTimeFormat.dateHourMinuteSecond(),
+        ISODateTimeFormat.dateHourMinuteSecondFraction(),
+        ISODateTimeFormat.dateHourMinuteSecondMillis(),
+        ISODateTimeFormat.hour(),
+        ISODateTimeFormat.hourMinute(),
+        ISODateTimeFormat.hourMinuteSecond(),
+        ISODateTimeFormat.hourMinuteSecondFraction(),
+        ISODateTimeFormat.hourMinuteSecondMillis(),
+        ISODateTimeFormat.ordinalDate(),
+        ISODateTimeFormat.weekDate(),
+        ISODateTimeFormat.year(),
+        ISODateTimeFormat.yearMonth(),
+        ISODateTimeFormat.yearMonthDay(),
+        ISODateTimeFormat.weekyear(),
+        ISODateTimeFormat.weekyearWeek(),
+        ISODateTimeFormat.weekyearWeekDay()
     };
-
-    @Override
-    public boolean canConvert(final Class<?> type) {
+    
+    public boolean canConvert(Class type) {
         return type.equals(GregorianCalendar.class);
     }
 
-    @Override
-    public Object fromString(final String str) {
-        for (final DateTimeFormatter formatter : formattersUTC) {
+    public Object fromString(String str) {
+        for (int i = 0; i < formattersUTC.length; i++ ) {
+            DateTimeFormatter formatter = formattersUTC[i];
             try {
-                final DateTime dt = formatter.parseDateTime(str);
-                final Calendar calendar = dt.toGregorianCalendar();
+                DateTime dt = formatter.parseDateTime(str);
+                Calendar calendar = dt.toGregorianCalendar();
                 calendar.setTimeZone(TimeZone.getDefault());
                 return calendar;
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // try with next formatter
             }
         }
         final DateTimeZone dateTimeZone = DateTimeZone.forTimeZone(TimeZone.getDefault());
-        for (final DateTimeFormatter element : formattersNoUTC) {
+        for (int i = 0; i < formattersNoUTC.length; i++ ) {
             try {
-                final DateTimeFormatter formatter = element.withZone(dateTimeZone);
+                final DateTimeFormatter formatter = formattersNoUTC[i].withZone(dateTimeZone);
                 final DateTime dt = formatter.parseDateTime(str);
                 final Calendar calendar = dt.toGregorianCalendar();
                 calendar.setTimeZone(TimeZone.getDefault());
                 return calendar;
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // try with next formatter
             }
         }
         throw new ConversionException("Cannot parse date " + str);
     }
 
-    @Override
-    public String toString(final Object obj) {
-        final DateTime dt = new DateTime(obj);
+    public String toString(Object obj) {
+        DateTime dt = new DateTime(obj);
         return dt.toString(formattersUTC[0]);
     }
 }
